@@ -22,7 +22,6 @@
   .btn-outline{background:#fff;color:var(--navy2);border:1px solid var(--line)}
   .btn-outline:hover{background:var(--paper)}
   .btn-outline.active{background:var(--gold);color:#241b03;border-color:var(--gold)}
-  table.cal td.selectedday{box-shadow:inset 0 0 0 2px #c9a24b;background:#fff6e0}
   main{max-width:1200px;margin:0 auto;padding:20px 24px 60px;}
   .panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:16px;}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
@@ -43,23 +42,36 @@
 
   .monthblock{margin-bottom:26px}
   .monthblock .mtitle{font-size:14px;font-weight:700;color:var(--navy2);margin:0 0 8px 2px}
-  table.cal{border-collapse:collapse;width:100%;table-layout:fixed}
-  table.cal th{background:var(--navy);color:#fff;font-size:12px;font-weight:600;padding:6px 0;text-align:center}
-  table.cal th.sat{color:#bcd6ff}
-  table.cal th.sun{color:#ffc3d1}
-  table.cal td{border:1px solid var(--line);vertical-align:top;min-height:64px;padding:3px 4px;cursor:pointer;background:#fff;transition:.1s}
-  table.cal td:hover{outline:2px solid var(--gold);outline-offset:-2px}
-  table.cal td.sat{background:var(--sat)}
-  table.cal td.sunhol{background:var(--sunhol)}
-  table.cal td.outside{opacity:.4}
-  table.cal td.today{box-shadow:inset 0 0 0 2px var(--gold)}
+  .calhead{display:grid;grid-template-columns:repeat(7,1fr);background:var(--navy);border-radius:6px 6px 0 0;overflow:hidden}
+  .calhead div{color:#fff;font-size:12px;font-weight:600;padding:6px 0;text-align:center}
+  .calhead div.sat{color:#bcd6ff}
+  .calhead div.sun{color:#ffc3d1}
+  .weekwrap{position:relative;border-left:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
+  .daysgrid{display:grid;grid-template-columns:repeat(7,1fr)}
+  .daycell{border-right:1px solid var(--line);vertical-align:top;height:100%;min-height:26px;padding:3px 4px;cursor:pointer;background:#fff;transition:.1s}
+  .daycell:last-child{border-right:none}
+  .daycell:hover{outline:2px solid var(--gold);outline-offset:-2px;position:relative;z-index:2}
+  .daycell.sat{background:var(--sat)}
+  .daycell.sunhol{background:var(--sunhol)}
+  .daycell.outside{opacity:.4}
+  .daycell.today{box-shadow:inset 0 0 0 2px var(--gold)}
+  .daycell.selectedday{box-shadow:inset 0 0 0 2px #c9a24b;background:#fff6e0}
   .daynum{font-size:11px;font-weight:700;color:var(--ink)}
-  .holname{font-size:9px;color:#c0392b;line-height:1.2;margin-top:1px}
-  .badges{display:flex;flex-direction:column;gap:2px;margin-top:3px}
-  .badge{font-size:10px;background:#eef0f4;border-radius:4px;padding:2px 4px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;display:flex;align-items:center;gap:3px}
-  .badge.me{background:#e8edfb;border:1px solid var(--navy2);font-weight:700}
-  .badge .bname{font-weight:700}
-  .badge .bcode{color:var(--muted);overflow:hidden;text-overflow:ellipsis}
+  .holname{font-size:9px;color:#c0392b;line-height:1.2;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .barlayer{position:absolute;left:0;right:0;top:24px;pointer-events:none}
+  .runbar{position:absolute;height:16px;border-radius:8px;font-size:9px;display:flex;align-items:center;gap:2px;padding:0 5px;overflow:hidden;white-space:nowrap;cursor:pointer;pointer-events:auto;box-shadow:0 0 0 1px rgba(255,255,255,.6)}
+  .runbar.me{box-shadow:0 0 0 1px var(--navy2)}
+  .runbar .rname{font-weight:700}
+  .runbar .rval{color:rgba(0,0,0,.55);overflow:hidden;text-overflow:ellipsis}
+  .code-연차{background:#b7d7f5}
+  .code-오전반차{background:#d6e4f0}
+  .code-오후반차{background:#d6e4f0}
+  .code-출장{background:#c6e0b4}
+  .code-재택{background:#e2efda}
+  .code-교육{background:#d9d2e9}
+  .code-병가{background:#f8cbad}
+  .code-경조사{background:#d9b99b}
+  .code-custom{background:#eef0f4}
 
   #todayBarPanel{padding:14px 18px}
   .todaybar-title{font-size:13px;font-weight:700;color:var(--navy2);margin-bottom:10px}
@@ -114,16 +126,26 @@
     </div>
     <div class="settings" id="settingsBox">
       <div class="row" style="margin-top:10px">
-        <label>owner</label><input type="text" id="ghOwner" placeholder="예: hyunseok-hd" style="width:140px">
-        <label>repo</label><input type="text" id="ghRepo" placeholder="데이터 전용 저장소명" style="width:160px">
-        <label>branch</label><input type="text" id="ghBranch" placeholder="main" style="width:80px">
-        <label>token</label><input type="password" id="ghToken" placeholder="개인 액세스 토큰 (repo 쓰기 권한)" style="width:260px">
-        <label>파일명</label><input type="text" id="ghPath" placeholder="attendance.json" style="width:140px">
+        <label style="width:100%;margin-bottom:4px">GitHub 개인 액세스 토큰</label>
+        <input type="text" id="ghQuickPaste" placeholder="ghp_xxxxxxxxxxxxxxxx" style="flex:1;min-width:280px">
+        <button class="btn btn-outline" id="ghQuickApply">적용</button>
       </div>
-      <div class="row" style="margin-top:8px">
-        <button class="btn btn-gold" id="ghSaveSettings">설정 저장</button>
-        <span class="status">토큰은 이 브라우저에만 저장됩니다(localStorage).</span>
+      <div class="row" style="margin-top:10px">
+        <span class="toggle-link" id="advancedToggle">고급 설정 (저장소 직접 지정) ▾</span>
       </div>
+      <div class="settings" id="advancedBox">
+        <div class="row" style="margin-top:10px">
+          <label>owner</label><input type="text" id="ghOwner" placeholder="예: hyunseok-hd" style="width:140px">
+          <label>repo</label><input type="text" id="ghRepo" placeholder="데이터 전용 저장소명" style="width:160px">
+          <label>branch</label><input type="text" id="ghBranch" placeholder="main" style="width:80px">
+          <label>token</label><input type="password" id="ghToken" placeholder="개인 액세스 토큰 (repo 쓰기 권한)" style="width:260px">
+          <label>파일명</label><input type="text" id="ghPath" placeholder="attendance.json" style="width:140px">
+        </div>
+        <div class="row" style="margin-top:8px">
+          <button class="btn btn-gold" id="ghSaveSettings">설정 저장</button>
+        </div>
+      </div>
+      <div class="status" style="margin-top:8px">토큰은 이 브라우저에만 저장됩니다(localStorage).</div>
     </div>
   </div>
 
@@ -192,6 +214,11 @@ const HOLIDAYS = {
   "2026-10-05":"개천절 대체공휴일","2026-10-09":"한글날","2026-12-25":"성탄절"
 };
 const WD = ["일","월","화","수","목","금","토"];
+// 팀 공통 기본값 — owner/repo/branch/파일명은 모두 동일하므로 코드에 고정, 사용자는 토큰만 입력
+const DEFAULT_OWNER = "DrivingSafe";
+const DEFAULT_REPO = "attendance-app";
+const DEFAULT_BRANCH = "main";
+const DEFAULT_PATH = "attendance.json";
 
 function canonicalCode(text){
   if(!text) return null;
@@ -220,11 +247,12 @@ function saveSettings(){
   loadFromGithub();
 }
 function loadSettingsUI(){
-  document.getElementById("ghOwner").value = ls("gh_owner");
-  document.getElementById("ghRepo").value = ls("gh_repo");
-  document.getElementById("ghBranch").value = ls("gh_branch") || "main";
+  document.getElementById("ghOwner").value = ls("gh_owner") || DEFAULT_OWNER;
+  document.getElementById("ghRepo").value = ls("gh_repo") || DEFAULT_REPO;
+  document.getElementById("ghBranch").value = ls("gh_branch") || DEFAULT_BRANCH;
   document.getElementById("ghToken").value = ls("gh_token");
-  document.getElementById("ghPath").value = ls("gh_path") || "attendance.json";
+  document.getElementById("ghQuickPaste").value = ls("gh_token");
+  document.getElementById("ghPath").value = ls("gh_path") || DEFAULT_PATH;
 }
 function ghHeaders(){
   return { "Authorization": "token " + ls("gh_token"), "Accept": "application/vnd.github+json" };
@@ -321,36 +349,86 @@ function peopleOnDay(ds){
   return list;
 }
 
+function weekRuns(week){
+  // 주(7일) 안에서 사람별로 연속·동일 값 구간을 찾아 {person,value,startCol,endCol} 목록으로 반환
+  const runs = [];
+  for(const p of PEOPLE){
+    let run = null;
+    for(let i=0;i<7;i++){
+      const v = (state.data[p] && state.data[p][week[i].ds]) || "";
+      if(v && run && run.value === v){
+        run.endCol = i;
+      } else {
+        if(run) runs.push(run);
+        run = v ? {person:p, value:v, startCol:i, endCol:i} : null;
+      }
+    }
+    if(run) runs.push(run);
+  }
+  return runs;
+}
+
+function packLanes(runs){
+  // 겹치는 구간끼리 겹치지 않게 lane(줄) 배정 (간단한 구간 스케줄링)
+  const sorted = [...runs].sort((a,b)=>a.startCol-b.startCol);
+  const laneEnd = [];
+  for(const r of sorted){
+    let lane = laneEnd.findIndex(end => end < r.startCol);
+    if(lane === -1){ lane = laneEnd.length; laneEnd.push(r.endCol); }
+    else { laneEnd[lane] = r.endCol; }
+    r.lane = lane;
+  }
+  return sorted;
+}
+
+function barLayerHtml(week){
+  const runs = packLanes(weekRuns(week));
+  const maxLane = runs.reduce((m,r)=>Math.max(m,r.lane), -1);
+  const LANE_H = 18;
+  let html = "";
+  const me = getMe();
+  runs.forEach(r=>{
+    const left = (r.startCol/7*100).toFixed(3);
+    const width = ((r.endCol-r.startCol+1)/7*100).toFixed(3);
+    const top = r.lane * LANE_H;
+    const mecls = (r.person===me) ? "me" : "";
+    const startDs = week[r.startCol].ds;
+    html += `<div class="runbar ${classFor(r.value)} ${mecls}" title="${escapeHtml(r.person+' · '+r.value)}"
+      style="left:${left}%;width:calc(${width}% - 3px);top:${top}px"
+      onclick="cellClick(event,'${startDs}')" oncontextmenu="return quickMenu(event,'${startDs}')">
+      <span>${iconFor(r.value)}</span><span class="rname">${r.person}</span><span class="rval">${escapeHtml(r.value)}</span>
+    </div>`;
+  });
+  return { html, lanes: maxLane+1 };
+}
+
 function buildMonthCalendar(y,m){
   const today = todayStr();
   const weeks = buildWeeks(y,m);
-  let html = `<div class="monthblock"><div class="mtitle">${y}년 ${m}월</div><table class="cal"><thead><tr>`;
-  WD.forEach((w,i)=>{
-    html += `<th class="${i===6?'sat':(i===0?'sun':'')}">${w}</th>`;
-  });
-  html += "</tr></thead><tbody>";
+  let html = `<div class="monthblock"><div class="mtitle">${y}년 ${m}월</div>`;
+  html += `<div class="calhead">`;
+  WD.forEach((w,i)=>{ html += `<div class="${i===6?'sat':(i===0?'sun':'')}">${w}</div>`; });
+  html += `</div>`;
   for(const week of weeks){
-    html += "<tr>";
+    const weekData = JSON.stringify(week.map(d=>({ds:d.ds, inMonth:d.inMonth})));
+    const bar = barLayerHtml(week);
+    const rowH = Math.max(1, bar.lanes) * 18 + 24 + 6;
+    html += `<div class="weekwrap" data-week='${weekData.replace(/'/g,"&#39;")}' style="min-height:${rowH}px">`;
+    html += `<div class="daysgrid" style="height:${rowH}px">`;
     for(let i=0;i<7;i++){
       const day = week[i];
       const wkcls = HOLIDAYS[day.ds] ? "sunhol" : (i===6?"sat":(i===0?"sunhol":""));
       const outsidecls = day.inMonth ? "" : "outside";
       const todaycls = day.ds===today ? "today" : "";
-      const entries = peopleOnDay(day.ds);
-      let badges = "";
-      entries.forEach(([p,v])=>{
-        const mecls = (p===getMe()) ? "me" : "";
-        badges += `<span class="badge ${mecls}"><span>${iconFor(v)}</span><span class="bname">${p}</span><span class="bcode">${escapeHtml(v)}</span></span>`;
-      });
-      html += `<td class="${wkcls} ${outsidecls} ${todaycls}" data-date="${day.ds}" onclick="cellClick(event,'${day.ds}')" oncontextmenu="return quickMenu(event,'${day.ds}')">
+      html += `<div class="daycell ${wkcls} ${outsidecls} ${todaycls}" data-date="${day.ds}" onclick="cellClick(event,'${day.ds}')" oncontextmenu="return quickMenu(event,'${day.ds}')">
         <div class="daynum">${day.d}</div>
         ${HOLIDAYS[day.ds] ? `<div class="holname">${HOLIDAYS[day.ds]}</div>` : ""}
-        <div class="badges">${badges}</div>
-      </td>`;
+      </div>`;
     }
-    html += "</tr>";
+    html += `</div><div class="barlayer" style="height:${bar.lanes*18}px">${bar.html}</div>`;
+    html += `</div>`;
   }
-  html += "</tbody></table></div>";
+  html += "</div>";
   return html;
 }
 
@@ -384,15 +462,18 @@ function renderGrid(){
 }
 
 function refreshDayCell(ds){
-  document.querySelectorAll(`td[data-date="${ds}"]`).forEach(td=>{
-    const entries = peopleOnDay(ds);
-    let badges = "";
-    entries.forEach(([p,v])=>{
-      const mecls = (p===getMe()) ? "me" : "";
-      badges += `<span class="badge ${mecls}"><span>${iconFor(v)}</span><span class="bname">${p}</span><span class="bcode">${escapeHtml(v)}</span></span>`;
-    });
-    const box = td.querySelector(".badges");
-    if(box) box.innerHTML = badges;
+  document.querySelectorAll(`.daycell[data-date="${ds}"]`).forEach(cell=>{
+    const weekwrap = cell.closest(".weekwrap");
+    if(!weekwrap) return;
+    let week;
+    try{ week = JSON.parse(weekwrap.getAttribute("data-week")); }catch(e){ return; }
+    const bar = barLayerHtml(week);
+    const barlayer = weekwrap.querySelector(".barlayer");
+    if(barlayer){ barlayer.innerHTML = bar.html; barlayer.style.height = (bar.lanes*18)+"px"; }
+    const rowH = Math.max(1,bar.lanes)*18 + 24 + 6;
+    weekwrap.style.minHeight = rowH + "px";
+    const daysgrid = weekwrap.querySelector(".daysgrid");
+    if(daysgrid) daysgrid.style.height = rowH + "px";
   });
   if(ds === todayStr()) renderTodayBar();
 }
@@ -415,19 +496,20 @@ function toggleMultiMode(){
 }
 
 function toggleSelect(ev, ds){
+  const cell = document.querySelector(`.daycell[data-date="${ds}"]`);
   if(selectedDays.has(ds)){
     selectedDays.delete(ds);
-    ev.currentTarget.classList.remove("selectedday");
+    if(cell) cell.classList.remove("selectedday");
   } else {
     selectedDays.add(ds);
-    ev.currentTarget.classList.add("selectedday");
+    if(cell) cell.classList.add("selectedday");
   }
   updateMultiStatus();
 }
 
 function clearSelection(){
   selectedDays.clear();
-  document.querySelectorAll("td.selectedday").forEach(td=>td.classList.remove("selectedday"));
+  document.querySelectorAll(".daycell.selectedday").forEach(c=>c.classList.remove("selectedday"));
   updateMultiStatus();
 }
 
@@ -613,7 +695,20 @@ function markDirty(){
 document.getElementById("settingsToggle").addEventListener("click", ()=>{
   document.getElementById("settingsBox").classList.toggle("open");
 });
+document.getElementById("advancedToggle").addEventListener("click", ()=>{
+  document.getElementById("advancedBox").classList.toggle("open");
+});
 document.getElementById("ghSaveSettings").addEventListener("click", saveSettings);
+document.getElementById("ghQuickApply").addEventListener("click", ()=>{
+  const token = document.getElementById("ghQuickPaste").value.trim();
+  if(!token){ alert("토큰을 붙여넣어주세요."); return; }
+  document.getElementById("ghOwner").value = DEFAULT_OWNER;
+  document.getElementById("ghRepo").value = DEFAULT_REPO;
+  document.getElementById("ghBranch").value = DEFAULT_BRANCH;
+  document.getElementById("ghToken").value = token;
+  document.getElementById("ghPath").value = DEFAULT_PATH;
+  saveSettings();
+});
 document.getElementById("refreshBtn").addEventListener("click", loadFromGithub);
 document.getElementById("saveBtn").addEventListener("click", saveToGithub);
 document.getElementById("prevMonth").addEventListener("click", ()=>{
