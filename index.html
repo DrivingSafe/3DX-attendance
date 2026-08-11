@@ -30,6 +30,8 @@
   input[type=text],input[type=password],select{border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-size:13px;background:#fff}
   .settings{display:none}
   .settings.open{display:block}
+  .settingsDropdown{display:none;position:absolute;top:38px;right:0;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:14px;width:340px;z-index:50;text-align:left}
+  .settingsDropdown.open{display:block}
   .toggle-link{font-size:12px;color:var(--navy2);cursor:pointer;text-decoration:underline;}
   .mechips{display:flex;gap:6px;flex-wrap:wrap}
   .mechip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
@@ -77,10 +79,18 @@
   #todayBarPanel{padding:14px 18px}
   .todaybar-title{font-size:13px;font-weight:700;color:var(--navy2);margin-bottom:10px}
   .todaybar-people{display:flex;gap:10px;flex-wrap:wrap}
-  .tb-person{display:flex;align-items:center;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:5px 12px 5px 6px;font-size:12px}
+  .tb-person{display:flex;align-items:center;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:5px 12px 5px 6px;font-size:12px;transition:.15s}
+  .tb-person.has-code{border-width:2px;border-color:rgba(0,0,0,.25);font-weight:600}
   .tb-icon{font-size:16px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;border:1px solid var(--line)}
   .tb-name{font-weight:700}
   .tb-code{color:var(--muted)}
+  .tb-person.has-code .tb-code{color:rgba(0,0,0,.6);font-weight:600}
+
+  .tb-group{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:6px 12px 6px 6px;font-size:12px}
+  .tb-group.code-연차,.tb-group.code-오전반차,.tb-group.code-오후반차,.tb-group.code-출장,.tb-group.code-재택,.tb-group.code-교육,.tb-group.code-병가,.tb-group.code-경조사,.tb-group.code-custom{border-width:2px;border-color:rgba(0,0,0,.2)}
+  .tb-glabel{font-weight:700}
+  .tb-gcount{background:rgba(0,0,0,.12);border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700}
+  .tb-gnames{color:rgba(0,0,0,.65)}
 
   .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:11px}
   .legend span{padding:3px 8px;border-radius:4px;border:1px solid var(--line)}
@@ -111,24 +121,17 @@
 
 <header>
   <div>
-    <h1>3D응용연구팀 근태 현황 (프로토타입) <span class="verbadge">v1</span></h1>
-    <div class="sub">2026년 · GitHub 저장 · 데모 버전 — 실제 데이터 사용 전 보안팀 확인 필요 · v1: 주간 막대 표시 + 색상 채우기 수정</div>
+    <h1>3D응용연구팀 근태 현황 <span class="verbadge">v7</span></h1>
+    <div class="sub">2026년 · GitHub 저장 · v7: 상단 범례 제거 (달력이 더 위로)</div>
   </div>
-  <div class="row">
+  <div class="row" style="position:relative">
     <button class="btn btn-ghost" id="refreshBtn">새로고침</button>
     <button class="btn btn-gold" id="saveBtn" disabled>저장</button>
-  </div>
-</header>
-
-<main>
-  <div class="panel">
-    <div class="row">
-      <span class="toggle-link" id="settingsToggle">GitHub 연결 설정 ▾</span>
-    </div>
-    <div class="settings" id="settingsBox">
-      <div class="row" style="margin-top:10px">
+    <button class="btn btn-ghost" id="settingsToggle">⚙️ 설정</button>
+    <div class="settingsDropdown" id="settingsBox">
+      <div class="row" style="margin-top:0">
         <label style="width:100%;margin-bottom:4px">GitHub 개인 액세스 토큰</label>
-        <input type="text" id="ghQuickPaste" placeholder="ghp_xxxxxxxxxxxxxxxx" style="flex:1;min-width:280px">
+        <input type="text" id="ghQuickPaste" placeholder="ghp_xxxxxxxxxxxxxxxx" style="flex:1;min-width:220px">
         <button class="btn btn-outline" id="ghQuickApply">적용</button>
       </div>
       <div class="row" style="margin-top:10px">
@@ -149,12 +152,27 @@
       <div class="status" style="margin-top:8px">토큰은 이 브라우저에만 저장됩니다(localStorage).</div>
     </div>
   </div>
+</header>
 
+<main>
   <div class="panel" id="todayBarPanel">
     <div id="todayBar"></div>
   </div>
 
+  <div class="panel" style="border-color:var(--gold);border-width:1.5px">
+    <div class="row" style="margin-bottom:8px">
+      <span style="font-weight:700;font-size:13px">📢 공지사항</span>
+      <span class="status" id="noticeStatus" style="margin:0"></span>
+    </div>
+    <textarea id="noticeText" placeholder="팀 전체 공지를 입력하세요 (자동 저장됩니다)" rows="2"
+      style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+  </div>
+
   <div class="panel">
+    <div id="setupBanner" style="display:none;background:#fff6e0;border:1px solid var(--gold);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px">
+      ⚠️ 아직 GitHub 토큰이 설정되지 않았습니다. 지금은 입력해도 <b>다른 사람에게 공유되거나 저장되지 않습니다</b>.
+      우측 상단 <b>⚙️ 설정</b>에서 토큰을 붙여넣고 적용해주세요.
+    </div>
     <div class="row" style="margin-bottom:10px;align-items:flex-start">
       <label style="margin-top:6px">나는</label>
       <div class="mechips" id="meChips"></div>
@@ -178,13 +196,6 @@
         </span>
       </div>
     </div>
-    <div class="legend" style="margin-bottom:14px">
-      <span class="code-연차">🌴 연차(=휴가)</span><span class="code-오전반차">🌓 오전반차</span><span class="code-오후반차">🌗 오후반차</span>
-      <span class="code-출장">✈️ 출장</span><span class="code-재택">🏠 재택</span><span class="code-교육">🎓 교육</span>
-      <span class="code-병가">🏥 병가</span><span class="code-경조사">🖤 경조사</span>
-      <span style="background:var(--sat)">토요일</span><span style="background:var(--sunhol)">일요일·공휴일</span>
-      <span>✏️ 자유 텍스트도 입력 가능</span>
-    </div>
     <div id="gridContainer"></div>
     <div class="legend">
       <span class="code-연차">🌴 연차(=휴가)</span><span class="code-오전반차">🌓 오전반차</span><span class="code-오후반차">🌗 오후반차</span>
@@ -199,7 +210,7 @@
 
 <div class="popup" id="popup"></div>
 
-<footer>내부 프로토타입 · 회사 보안 정책 검토 전 실제 근태 데이터 입력 비권장</footer>
+<footer>제작: HDX 3D응용연구팀 · 써보시고 불편한 점이나 아이디어 있으면 편하게 알려주세요 🙂</footer>
 
 <script>
 const PEOPLE = ["정광호","김현석","민경훈","이광욱","이일우","이진욱","정국호"];
@@ -245,7 +256,12 @@ function saveSettings(){
   localStorage.setItem("gh_branch", document.getElementById("ghBranch").value.trim() || "main");
   localStorage.setItem("gh_token", document.getElementById("ghToken").value.trim());
   localStorage.setItem("gh_path", document.getElementById("ghPath").value.trim() || "attendance.json");
+  updateSetupBanner();
   loadFromGithub();
+}
+function updateSetupBanner(){
+  const banner = document.getElementById("setupBanner");
+  if(banner) banner.style.display = ls("gh_token") ? "none" : "block";
 }
 function loadSettingsUI(){
   document.getElementById("ghOwner").value = ls("gh_owner") || DEFAULT_OWNER;
@@ -263,7 +279,7 @@ function ghUrl(){
 }
 async function loadFromGithub(){
   const statusEl = document.getElementById("loadStatus");
-  if(!ls("gh_owner") || !ls("gh_repo")){ statusEl.textContent = "GitHub 설정을 먼저 입력하세요."; return; }
+  if(!ls("gh_owner") || !ls("gh_repo")){ statusEl.textContent = "⚙️ 설정에서 토큰을 먼저 입력해주세요."; return; }
   statusEl.textContent = "불러오는 중...";
   try{
     const res = await fetch(ghUrl(), { headers: ghHeaders() });
@@ -287,7 +303,8 @@ async function loadFromGithub(){
 async function saveToGithub(){
   const statusEl = document.getElementById("saveStatus");
   if(!ls("gh_owner") || !ls("gh_repo") || !ls("gh_token")){
-    statusEl.textContent = "GitHub 설정(특히 토큰)을 먼저 입력하세요."; return;
+    statusEl.textContent = "⚠️ 아직 GitHub 토큰이 설정되지 않아 저장할 수 없습니다. 우측 상단 ⚙️ 설정에서 입력해주세요.";
+    return;
   }
   statusEl.textContent = "저장 중...";
   const body = {
@@ -306,11 +323,16 @@ async function saveToGithub(){
       state.sha = json.content.sha;
       state.dirty = false;
       document.getElementById("saveBtn").disabled = true;
-      statusEl.textContent = "저장 완료 (" + new Date().toLocaleTimeString() + ")";
+      const msg = "✅ 자동 저장됨 (" + new Date().toLocaleTimeString() + ") · 다른 사람도 새로고침하면 보입니다";
+      statusEl.textContent = msg;
       statusEl.classList.remove("dirty");
+      const noticeStatusEl = document.getElementById("noticeStatus");
+      if(noticeStatusEl) noticeStatusEl.textContent = "✅ 저장됨 (" + new Date().toLocaleTimeString() + ")";
     } else {
       const err = await res.text();
       statusEl.textContent = "저장 실패: " + res.status + " " + err.slice(0,150);
+      const noticeStatusEl = document.getElementById("noticeStatus");
+      if(noticeStatusEl) noticeStatusEl.textContent = "저장 실패";
     }
   }catch(e){ statusEl.textContent = "네트워크 오류: " + e.message; }
 }
@@ -437,9 +459,27 @@ function renderTodayBar(){
   const today = todayStr();
   const holidayName = HOLIDAYS[today];
   let html = `<div class="todaybar-title">오늘 (${today}${holidayName?" · "+holidayName:""}) 팀 현황</div><div class="todaybar-people">`;
+
+  // 같은 근태끼리 묶기 (표시값 그대로 그룹핑 — "휴가"와 "연차"는 아이콘은 같지만 별개 그룹으로 취급)
+  const groups = {}; // key: 표시값("" = 정상근무), value: [names]
   for(const p of PEOPLE){
     const code = (state.data[p] && state.data[p][today]) || "";
-    html += `<div class="tb-person"><span class="tb-icon">${code?iconFor(code):"💺"}</span><span class="tb-name">${p}</span><span class="tb-code">${code||"정상근무"}</span></div>`;
+    if(!groups[code]) groups[code] = [];
+    groups[code].push(p);
+  }
+  const keys = Object.keys(groups).sort((a,b)=>{
+    if(a==="") return 1; if(b==="") return -1; // 정상근무는 맨 뒤로
+    return groups[b].length - groups[a].length; // 인원 많은 그룹 먼저
+  });
+  for(const code of keys){
+    const names = groups[code];
+    const cls = code ? classFor(code) : "";
+    html += `<div class="tb-group ${cls}">
+      <span class="tb-icon">${code?iconFor(code):"💺"}</span>
+      <span class="tb-glabel">${code||"정상근무"}</span>
+      <span class="tb-gcount">${names.length}명</span>
+      <span class="tb-gnames">${names.join(", ")}</span>
+    </div>`;
   }
   html += "</div>";
   document.getElementById("todayBar").innerHTML = html;
@@ -447,6 +487,7 @@ function renderTodayBar(){
 
 function renderGrid(){
   renderTodayBar();
+  renderNotice();
   const dl = document.getElementById("codelist");
   dl.innerHTML = [...CODES, ...Object.keys(SYNONYMS)].map(c=>`<option value="${c}">`).join("");
 
@@ -689,12 +730,38 @@ function clearRow(person, ds, btn){
 function markDirty(){
   state.dirty = true;
   document.getElementById("saveBtn").disabled = false;
-  document.getElementById("saveStatus").textContent = "저장되지 않은 변경사항이 있습니다.";
+  document.getElementById("saveStatus").textContent = "입력 반영됨 · 잠시 후 자동 저장됩니다...";
   document.getElementById("saveStatus").classList.add("dirty");
+  scheduleAutoSave();
+}
+function renderNotice(){
+  const el = document.getElementById("noticeText");
+  if(document.activeElement !== el){ // 입력 중인데 새로고침 등으로 값이 덮어써지는 것 방지
+    el.value = state.data["_notice"] || "";
+  }
+}
+function setNotice(value){
+  state.data["_notice"] = value;
+  markDirty();
+  document.getElementById("noticeStatus").textContent = "저장 중...";
+}
+let autoSaveTimer = null;
+function scheduleAutoSave(){
+  if(!ls("gh_token")) return; // 토큰 없으면 자동저장 시도 안 함(불필요한 실패 메시지 방지)
+  if(autoSaveTimer) clearTimeout(autoSaveTimer);
+  autoSaveTimer = setTimeout(saveToGithub, 1500);
 }
 
-document.getElementById("settingsToggle").addEventListener("click", ()=>{
+document.getElementById("settingsToggle").addEventListener("click", (e)=>{
+  e.stopPropagation();
   document.getElementById("settingsBox").classList.toggle("open");
+});
+document.addEventListener("click", (e)=>{
+  const box = document.getElementById("settingsBox");
+  const btn = document.getElementById("settingsToggle");
+  if(box.classList.contains("open") && !box.contains(e.target) && e.target!==btn){
+    box.classList.remove("open");
+  }
 });
 document.getElementById("advancedToggle").addEventListener("click", ()=>{
   document.getElementById("advancedBox").classList.toggle("open");
@@ -711,7 +778,10 @@ document.getElementById("ghQuickApply").addEventListener("click", ()=>{
   saveSettings();
 });
 document.getElementById("refreshBtn").addEventListener("click", loadFromGithub);
-document.getElementById("saveBtn").addEventListener("click", saveToGithub);
+document.getElementById("saveBtn").addEventListener("click", ()=>{
+  if(autoSaveTimer) clearTimeout(autoSaveTimer);
+  saveToGithub();
+});
 document.getElementById("prevMonth").addEventListener("click", ()=>{
   state.month--; if(state.month<1){state.month=12; state.year--;} renderGrid();
 });
@@ -728,6 +798,7 @@ document.getElementById("multiApplyBtn").addEventListener("click", openMultiAppl
 document.getElementById("multiClearBtn").addEventListener("click", clearSelection);
 
 loadSettingsUI();
+updateSetupBanner();
 function renderMeChips(){
   const box = document.getElementById("meChips");
   const me = getMe();
@@ -743,6 +814,9 @@ function pickMe(p){
 renderMeChips();
 renderGrid();
 updateMultiStatus();
+document.getElementById("noticeText").addEventListener("input", (e)=>{
+  setNotice(e.target.value);
+});
 if(ls("gh_owner") && ls("gh_repo")) loadFromGithub();
 </script>
 </body>
