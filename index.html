@@ -191,7 +191,7 @@ const HOLIDAYS = {
   "2026-09-24":"추석연휴","2026-09-25":"추석","2026-09-26":"추석연휴","2026-10-03":"개천절",
   "2026-10-05":"개천절 대체공휴일","2026-10-09":"한글날","2026-12-25":"성탄절"
 };
-const WD = ["월","화","수","목","금","토","일"];
+const WD = ["일","월","화","수","목","금","토"];
 
 function canonicalCode(text){
   if(!text) return null;
@@ -291,7 +291,7 @@ function todayStr(){ const t=new Date(); return dateStr(t.getFullYear(), t.getMo
 
 function buildWeeks(year, month){
   const first = new Date(year, month-1, 1);
-  const offset = (first.getDay()+6)%7; // 0=월
+  const offset = first.getDay(); // 0=일
   const start = new Date(year, month-1, 1-offset);
   const daysInM = new Date(year, month, 0).getDate();
   const totalCells = Math.ceil((offset+daysInM)/7)*7;
@@ -326,14 +326,14 @@ function buildMonthCalendar(y,m){
   const weeks = buildWeeks(y,m);
   let html = `<div class="monthblock"><div class="mtitle">${y}년 ${m}월</div><table class="cal"><thead><tr>`;
   WD.forEach((w,i)=>{
-    html += `<th class="${i===5?'sat':(i===6?'sun':'')}">${w}</th>`;
+    html += `<th class="${i===6?'sat':(i===0?'sun':'')}">${w}</th>`;
   });
   html += "</tr></thead><tbody>";
   for(const week of weeks){
     html += "<tr>";
     for(let i=0;i<7;i++){
       const day = week[i];
-      const wkcls = HOLIDAYS[day.ds] ? "sunhol" : (i===5?"sat":(i===6?"sunhol":""));
+      const wkcls = HOLIDAYS[day.ds] ? "sunhol" : (i===6?"sat":(i===0?"sunhol":""));
       const outsidecls = day.inMonth ? "" : "outside";
       const todaycls = day.ds===today ? "today" : "";
       const entries = peopleOnDay(day.ds);
