@@ -11,11 +11,17 @@
   }
   *{box-sizing:border-box}
   body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:var(--paper);color:var(--ink);}
+  @keyframes popIn{0%{opacity:0}100%{opacity:1}}
+  @keyframes bouncePop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
+  @keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
+  .confetti-piece{position:fixed;pointer-events:none;font-size:18px;z-index:999;will-change:transform,opacity}
   header{background:var(--navy);color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
   header h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.2px}
   .verbadge{display:inline-block;background:var(--gold);color:#241b03;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;vertical-align:middle;margin-left:6px}
   header .sub{font-size:12px;color:#b9c2d6;margin-top:2px}
-  .btn{border:none;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s}
+  .btn{border:none;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:transform .12s,filter .12s}
+  .btn:hover{transform:translateY(-1px) scale(1.03)}
+  .btn:active{transform:translateY(0) scale(.97)}
   .btn-gold{background:var(--gold);color:#241b03}
   .btn-gold:hover{filter:brightness(1.08)}
   .btn-ghost{background:transparent;color:#fff;border:1px solid rgba(255,255,255,.35)}
@@ -34,14 +40,16 @@
   .settingsDropdown.open{display:block}
   .toggle-link{font-size:12px;color:var(--navy2);cursor:pointer;text-decoration:underline;}
   .mechips{display:flex;gap:6px;flex-wrap:wrap}
-  .mechip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink)}
+  .mechip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink);transition:transform .12s}
+  .mechip:hover{transform:scale(1.06);animation:wiggle .3s ease-in-out}
   .mechip:hover{border-color:var(--navy2)}
   .mechip.active{background:var(--navy2);border-color:var(--navy2);color:#fff}
-  .monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:12px}
-  .monthbar .title{font-size:16px;font-weight:700}
-  .monthnav{display:flex;align-items:center;gap:8px}
-  .monthactions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
-  .navbtn{background:#fff;border:1px solid var(--line);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:14px}
+  .monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:nowrap;gap:12px;overflow-x:auto}
+  .monthbar .title{font-size:16px;font-weight:700;white-space:nowrap}
+  .monthnav{display:flex;align-items:center;gap:8px;flex-shrink:0}
+  .monthactions{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;flex-shrink:0}
+  .navbtn{background:#fff;border:1px solid var(--line);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:14px;transition:transform .12s}
+  .navbtn:hover{transform:scale(1.15)}
 
   .monthblock{margin-bottom:26px}
   .monthblock .mtitle{font-size:14px;font-weight:700;color:var(--navy2);margin:0 0 8px 2px}
@@ -53,7 +61,7 @@
   .daysgrid{display:grid;grid-template-columns:repeat(7,1fr);align-items:stretch}
   .daycell{border-right:1px solid var(--line);padding:3px 4px;cursor:pointer;background:#fff;transition:.1s;overflow:hidden;height:100%}
   .daycell:last-child{border-right:none}
-  .daycell:hover{outline:2px solid var(--gold);outline-offset:-2px;position:relative;z-index:2}
+  .daycell:hover{outline:2px solid var(--gold);outline-offset:-2px;position:relative;z-index:2;cursor:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28'><text y='22' font-size='22'>📅</text></svg>") 8 8, pointer}
   .daycell.sat{background:var(--sat)}
   .daycell.sunhol{background:var(--sunhol)}
   .daycell.outside{opacity:.4}
@@ -62,7 +70,9 @@
   .daynum{font-size:12px;font-weight:700;color:var(--ink)}
   .holname{font-size:10px;color:#c0392b;line-height:1.2;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .barlayer{position:absolute;left:0;right:0;top:34px;pointer-events:none}
-  .runbar{position:absolute;height:19px;border-radius:8px;font-size:10.5px;font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:3px;padding:0 6px;overflow:hidden;white-space:nowrap;cursor:pointer;pointer-events:auto;box-shadow:0 0 0 1px rgba(255,255,255,.7)}
+  .runbar{position:absolute;height:19px;border-radius:8px;font-size:10.5px;font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:3px;padding:0 6px;overflow:hidden;white-space:nowrap;cursor:pointer;pointer-events:auto;box-shadow:0 0 0 1px rgba(255,255,255,.7);animation:popIn .18s ease-out;transition:transform .12s}
+  .runbar.justset{animation:bouncePop .32s ease-out}
+  .runbar:hover{transform:scale(1.06) translateY(-1px);z-index:5}
   .runbar.me{box-shadow:0 0 0 1px var(--navy2)}
   .runbar .rname{font-weight:700}
   .runbar .rval{color:rgba(0,0,0,.7);overflow:hidden;text-overflow:ellipsis}
@@ -121,8 +131,8 @@
 
 <header>
   <div>
-    <h1>3D응용연구팀 근태 현황 <span class="verbadge">v7</span></h1>
-    <div class="sub">2026년 · GitHub 저장 · v7: 상단 범례 제거 (달력이 더 위로)</div>
+    <h1>3D응용연구팀 근태 현황 <span class="verbadge">v11</span></h1>
+    <div class="sub">2026년 · GitHub 저장 · v11: 흔들림 효과가 엉뚱한 막대에 적용되던 버그 수정</div>
   </div>
   <div class="row" style="position:relative">
     <button class="btn btn-ghost" id="refreshBtn">새로고침</button>
@@ -416,7 +426,7 @@ function barLayerHtml(week){
     const top = r.lane * LANE_H;
     const mecls = (r.person===me) ? "me" : "";
     const startDs = week[r.startCol].ds;
-    html += `<div class="runbar ${classFor(r.value)} ${mecls}" title="${escapeHtml(r.person+' · '+r.value)}"
+    html += `<div class="runbar ${classFor(r.value)} ${mecls}" data-person="${r.person}" data-start="${startDs}" data-end="${week[r.endCol].ds}" title="${escapeHtml(r.person+' · '+r.value)}"
       style="left:${left}%;width:calc(${width}% - 3px);top:${top}px"
       onclick="cellClick(event,'${startDs}')" oncontextmenu="return quickMenu(event,'${startDs}')">
       <span>${iconFor(r.value)}</span><span class="rname">${r.person}</span><span class="rval">${escapeHtml(r.value)}</span>
@@ -503,7 +513,7 @@ function renderGrid(){
     months.map(([yy,mm])=>buildMonthCalendar(yy,mm)).join("");
 }
 
-function refreshDayCell(ds){
+function refreshDayCell(ds, changedPerson){
   document.querySelectorAll(`.daycell[data-date="${ds}"]`).forEach(cell=>{
     const weekwrap = cell.closest(".weekwrap");
     if(!weekwrap) return;
@@ -511,7 +521,18 @@ function refreshDayCell(ds){
     try{ week = JSON.parse(weekwrap.getAttribute("data-week")); }catch(e){ return; }
     const bar = barLayerHtml(week);
     const barlayer = weekwrap.querySelector(".barlayer");
-    if(barlayer){ barlayer.innerHTML = bar.html; barlayer.style.height = (bar.lanes*20)+"px"; }
+    if(barlayer){
+      barlayer.innerHTML = bar.html;
+      barlayer.style.height = (bar.lanes*20)+"px";
+      if(changedPerson){
+        // 실제로 입력한 날짜(ds)가 포함된 막대만 정확히 찾아서 효과 (동일 인물의 다른 막대는 건드리지 않음)
+        const candidates = barlayer.querySelectorAll(`.runbar[data-person="${changedPerson}"]`);
+        candidates.forEach(el=>{
+          const s = el.getAttribute("data-start"), en = el.getAttribute("data-end");
+          if(s && en && s <= ds && ds <= en) el.classList.add("justset");
+        });
+      }
+    }
     const rowH = 34 + bar.lanes*20 + 4;
     weekwrap.style.minHeight = rowH + "px";
     const daysgrid = weekwrap.querySelector(".daysgrid");
@@ -616,9 +637,9 @@ function quickMenu(ev, ds){
   if(me){
     html += `<div class="status" style="margin:-2px 0 4px">'${me}'로 빠르게 입력</div>`;
     for(const c of CODES){
-      html += `<button class="qmbtn" onclick="quickSet('${me}','${ds}','${c}')">${ICONS[c]} ${c}</button>`;
+      html += `<button class="qmbtn" onclick="quickSet(event,'${me}','${ds}','${c}')">${ICONS[c]} ${c}</button>`;
     }
-    html += `<button class="qmbtn" onclick="quickSet('${me}','${ds}','')">💺 공란(정상근무)으로 지우기</button>`;
+    html += `<button class="qmbtn" onclick="quickSet(event,'${me}','${ds}','')">💺 공란(정상근무)으로 지우기</button>`;
     html += `<div class="qmsep"></div>`;
   } else {
     html += `<div class="status" style="margin:-2px 0 8px">상단에서 '나'를 선택하면 원클릭 입력이 활성화됩니다.</div>`;
@@ -636,11 +657,42 @@ function quickMenu(ev, ds){
   return false;
 }
 
-function quickSet(person, ds, value){
+function burstConfetti(x, y){
+  const emojis = ["🎉","✨","🌴","🎊","🥳"];
+  for(let i=0;i<22;i++){
+    const el = document.createElement("div");
+    el.className = "confetti-piece";
+    el.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+    el.style.left = x + "px";
+    el.style.top = y + "px";
+    el.style.fontSize = (20 + Math.random()*16) + "px";
+    document.body.appendChild(el);
+    const angle = Math.random()*Math.PI*2;
+    const dist = 90 + Math.random()*130;
+    const dx = Math.cos(angle)*dist, dy = Math.sin(angle)*dist - 30;
+    const dur = 650 + Math.random()*450;
+    el.animate([
+      { transform: "translate(-50%,-50%) rotate(0deg) scale(.5)", opacity: 1 },
+      { transform: `translate(calc(-50% + ${dx}px), calc(-50% + ${dy}px)) rotate(${(Math.random()>.5?1:-1)*260}deg) scale(1.1)`, opacity: 0 }
+    ], { duration: dur, easing: "cubic-bezier(.15,.8,.25,1)" });
+    setTimeout(()=>el.remove(), dur+50);
+  }
+}
+const LEAVE_CODES = ["연차","오전반차","오후반차"]; // 휴가는 canonicalCode로 연차와 동일 취급됨
+function maybeCelebrate(value, x, y){
+  const c = canonicalCode(value);
+  if(!LEAVE_CODES.includes(c)) return;
+  burstConfetti(x, y);
+}
+
+function quickSet(ev, person, ds, value){
   if(!state.data[person]) state.data[person] = {};
   if(value) state.data[person][ds] = value; else delete state.data[person][ds];
   markDirty();
-  refreshDayCell(ds);
+  refreshDayCell(ds, person);
+  const x = ev && ev.clientX ? ev.clientX : window.innerWidth/2;
+  const y = ev && ev.clientY ? ev.clientY : window.innerHeight/3;
+  maybeCelebrate(value, x, y);
   document.getElementById("popup").classList.remove("open");
 }
 
@@ -677,7 +729,7 @@ function dayPopupHtml(ds){
     html += `<div class="prow ${mecls}">
       <span class="pname">${p}${p===me?" ★":""}</span>
       <input type="text" list="codelist" value="${v}" placeholder="입력 또는 선택" id="inp_${p}"
-        onchange="setEntry('${p}','${ds}', this.value)"
+        onchange="setEntry('${p}','${ds}', this.value, this)"
         onkeydown="if(event.key==='Enter'){ this.blur(); }">
       <button class="clr" title="지우기" onclick="clearRow('${p}','${ds}', this)">✕</button>
     </div>`;
@@ -713,12 +765,15 @@ function closePopupOnce(e){
     document.removeEventListener("click", closePopupOnce);
   }
 }
-function setEntry(person, ds, value){
+function setEntry(person, ds, value, inputEl){
   value = (value||"").trim();
   if(!state.data[person]) state.data[person] = {};
   if(value) state.data[person][ds] = value; else delete state.data[person][ds];
   markDirty();
-  refreshDayCell(ds);
+  refreshDayCell(ds, person);
+  let x = window.innerWidth/2, y = window.innerHeight/3;
+  if(inputEl){ const r = inputEl.getBoundingClientRect(); x = r.left + r.width/2; y = r.top + r.height/2; }
+  maybeCelebrate(value, x, y);
 }
 function clearRow(person, ds, btn){
   if(state.data[person]) delete state.data[person][ds];
