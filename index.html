@@ -103,6 +103,20 @@
   .tb-gnames{color:rgba(0,0,0,.65)}
 
   .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:13px}
+
+  .eventsbox{border:1px solid var(--line);border-top:none;border-radius:0 0 8px 8px;padding:10px 12px;background:#fbfbfc}
+  .eventsbox-head{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:700;color:var(--navy2);margin-bottom:6px}
+  .eventsbox-empty{font-size:12px;color:var(--muted);padding:4px 0}
+  .eventrow{display:flex;align-items:center;gap:8px;padding:5px 2px;font-size:12.5px;border-top:1px solid var(--line)}
+  .eventrow:first-of-type{border-top:none}
+  .eventdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+  .eventtitle{font-weight:600;flex:1}
+  .eventrange{color:var(--muted);font-size:11.5px}
+  .eventedit,.eventdel{border:none;background:none;cursor:pointer;font-size:12px;color:var(--muted);padding:2px 4px}
+  .eventdel:hover{color:#c0392b}
+  .colorpick{display:flex;gap:6px;margin-top:4px}
+  .colorswatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff}
+  .colorswatch.selected{border-color:var(--ink);transform:scale(1.1)}
   .legend span{padding:3px 8px;border-radius:4px;border:1px solid var(--line)}
   .status{font-size:12px;color:var(--muted);margin-top:8px}
   .status.dirty{color:#b45309;font-weight:600}
@@ -131,8 +145,8 @@
 
 <header>
   <div>
-    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v12</span></h1>
-    <div class="sub">2026년 · GitHub 저장 · v12: 토큰 프록시 지원, 반응형/글자 크기 개선, 조직명·팀원 설정 가능</div>
+    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v13</span></h1>
+    <div class="sub">2026년 · GitHub 저장 · v13: 월별 공유 일정(세미나/행사/공지) 추가</div>
   </div>
   <div class="row" style="position:relative">
     <button class="btn btn-ghost" id="refreshBtn">새로고침</button>
@@ -552,7 +566,9 @@ function buildMonthCalendar(y,m){
       const wkcls = HOLIDAYS[day.ds] ? "sunhol" : (i===6?"sat":(i===0?"sunhol":""));
       const outsidecls = day.inMonth ? "" : "outside";
       const todaycls = day.ds===today ? "today" : "";
-      html += `<div class="daycell ${wkcls} ${outsidecls} ${todaycls}" data-date="${day.ds}" onclick="cellClick(event,'${day.ds}')" oncontextmenu="return quickMenu(event,'${day.ds}')">
+      const ev = eventOnDay(day.ds);
+      const evStyle = ev ? `border-top:4px solid ${ev.color}` : "";
+      html += `<div class="daycell ${wkcls} ${outsidecls} ${todaycls}" data-date="${day.ds}" style="${evStyle}" title="${ev?escapeHtml(ev.title):''}" onclick="cellClick(event,'${day.ds}')" oncontextmenu="return quickMenu(event,'${day.ds}')">
         <div class="daynum">${day.d}</div>
         ${HOLIDAYS[day.ds] ? `<div class="holname">${HOLIDAYS[day.ds]}</div>` : ""}
       </div>`;
@@ -560,8 +576,54 @@ function buildMonthCalendar(y,m){
     html += `</div><div class="barlayer" style="height:${bar.lanes*20}px">${bar.html}</div>`;
     html += `</div>`;
   }
+  html += buildEventsListHtml(y,m);
   html += "</div>";
   return html;
+}
+
+const EVENT_COLORS = [
+  {name:"세미나", color:"#8e7cc3"},
+  {name:"행사", color:"#e69138"},
+  {name:"공지", color:"#6d9eeb"},
+  {name:"휴무", color:"#e06666"},
+  {name:"기타", color:"#93c47d"}
+];
+function getEvents(){ return state.data["_events"] || []; }
+function eventsOverlappingMonth(y,m){
+  const first = dateStr(y,m,1);
+  const last = dateStr(y,m,new Date(y,m,0).getDate());
+  return getEvents().filter(e => e.start <= last && e.end >= first)
+    .sort((a,b)=> a.start < b.start ? -1 : 1);
+}
+function eventOnDay(ds){
+  const evs = getEvents().filter(e => e.start <= ds && e.end >= ds);
+  return evs.length ? evs[0] : null;
+}
+function buildEventsListHtml(y,m){
+  const evs = eventsOverlappingMonth(y,m);
+  let html = `<div class="eventsbox">`;
+  html += `<div class="eventsbox-head"><span>📌 ${y}년 ${m}월 공유 일정</span>
+    <button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="openEventForm(null,${y},${m})">+ 일정 추가</button></div>`;
+  if(evs.length === 0){
+    html += `<div class="eventsbox-empty">등록된 일정이 없습니다.</div>`;
+  } else {
+    evs.forEach(e=>{
+      const rangeTxt = e.start === e.end ? formatKDate(e.start) : `${formatKDate(e.start)} ~ ${formatKDate(e.end)}`;
+      html += `<div class="eventrow">
+        <span class="eventdot" style="background:${e.color}"></span>
+        <span class="eventtitle">${escapeHtml(e.title)}</span>
+        <span class="eventrange">${rangeTxt}</span>
+        <button class="eventedit" onclick="openEventForm('${e.id}')">✏️</button>
+        <button class="eventdel" onclick="deleteEvent('${e.id}')">✕</button>
+      </div>`;
+    });
+  }
+  html += `</div>`;
+  return html;
+}
+function formatKDate(ds){
+  const [y,m,d] = ds.split("-");
+  return `${parseInt(m)}/${parseInt(d)}`;
 }
 
 function renderTodayBar(){
@@ -792,6 +854,75 @@ function quickSet(ev, person, ds, value){
   const x = ev && ev.clientX ? ev.clientX : window.innerWidth/2;
   const y = ev && ev.clientY ? ev.clientY : window.innerHeight/3;
   maybeCelebrate(value, x, y);
+  document.getElementById("popup").classList.remove("open");
+}
+
+function uid(){ return "e" + Date.now().toString(36) + Math.random().toString(36).slice(2,6); }
+
+function openEventForm(id, defaultY, defaultM){
+  const popup = document.getElementById("popup");
+  document.removeEventListener("click", closePopupOnce);
+  const existing = id ? getEvents().find(e=>e.id===id) : null;
+  const today = todayStr();
+  let defStart = today, defEnd = today;
+  if(defaultY && defaultM){ defStart = dateStr(defaultY, defaultM, 1); defEnd = defStart; }
+  const title = existing ? existing.title : "";
+  const start = existing ? existing.start : defStart;
+  const end = existing ? existing.end : defEnd;
+  const color = existing ? existing.color : EVENT_COLORS[0].color;
+
+  let html = `<h4>${existing ? "일정 수정" : "새 공유 일정"}</h4>`;
+  html += `<div class="prow"><span class="pname">제목</span><input type="text" id="evTitle" placeholder="예: XR UX 세미나" value="${escapeHtml(title)}"></div>`;
+  html += `<div class="prow"><span class="pname">시작일</span><input type="date" id="evStart" value="${start}"></div>`;
+  html += `<div class="prow"><span class="pname">종료일</span><input type="date" id="evEnd" value="${end}"></div>`;
+  html += `<div class="prow"><span class="pname">유형</span></div>`;
+  html += `<div class="colorpick" id="evColorPick">`;
+  EVENT_COLORS.forEach(c=>{
+    html += `<div class="colorswatch ${c.color===color?'selected':''}" data-color="${c.color}" style="background:${c.color}" title="${c.name}" onclick="pickEventColor('${c.color}')"></div>`;
+  });
+  html += `</div>`;
+  html += `<div class="row" style="justify-content:space-between;margin-top:10px">`;
+  html += existing ? `<button class="btn btn-outline" onclick="deleteEvent('${existing.id}')">삭제</button>` : `<span></span>`;
+  html += `<div class="row" style="gap:6px">
+    <button class="btn btn-outline" onclick="document.getElementById('popup').classList.remove('open')">취소</button>
+    <button class="btn btn-gold" onclick="saveEvent('${existing ? existing.id : ''}')">저장</button>
+  </div></div>`;
+  popup.innerHTML = html;
+  popup.style.left = (window.scrollX + window.innerWidth/2 - 150) + "px";
+  popup.style.top = (window.scrollY + 120) + "px";
+  popup.classList.add("open");
+  setTimeout(()=>{ document.getElementById("evTitle").focus(); document.addEventListener("click", closePopupOnce); }, 30);
+}
+function pickEventColor(color){
+  document.querySelectorAll("#evColorPick .colorswatch").forEach(el=>{
+    el.classList.toggle("selected", el.getAttribute("data-color")===color);
+  });
+}
+function saveEvent(id){
+  const title = document.getElementById("evTitle").value.trim();
+  let start = document.getElementById("evStart").value;
+  let end = document.getElementById("evEnd").value;
+  const selected = document.querySelector("#evColorPick .colorswatch.selected");
+  const color = selected ? selected.getAttribute("data-color") : EVENT_COLORS[0].color;
+  if(!title){ alert("제목을 입력해주세요."); return; }
+  if(!start || !end){ alert("날짜를 입력해주세요."); return; }
+  if(start > end){ const t=start; start=end; end=t; }
+  if(!state.data["_events"]) state.data["_events"] = [];
+  if(id){
+    const idx = state.data["_events"].findIndex(e=>e.id===id);
+    if(idx>-1) state.data["_events"][idx] = { id, title, start, end, color };
+  } else {
+    state.data["_events"].push({ id: uid(), title, start, end, color });
+  }
+  markDirty();
+  renderGrid();
+  document.getElementById("popup").classList.remove("open");
+}
+function deleteEvent(id){
+  if(!confirm("이 일정을 삭제할까요?")) return;
+  state.data["_events"] = getEvents().filter(e=>e.id!==id);
+  markDirty();
+  renderGrid();
   document.getElementById("popup").classList.remove("open");
 }
 
