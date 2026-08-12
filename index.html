@@ -10,16 +10,16 @@
     --line:#e2e5ea; --sat:#eaf1fb; --sunhol:#fce4ec; --ink:#232833; --muted:#8a90a0;
   }
   *{box-sizing:border-box}
-  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:var(--paper);color:var(--ink);font-size:clamp(14px,0.95vw,16px);}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,'Malgun Gothic','Apple SD Gothic Neo',sans-serif;background:var(--paper);color:var(--ink);font-size:clamp(16px,1.1vw,19px);}
   @keyframes popIn{0%{opacity:0}100%{opacity:1}}
   @keyframes bouncePop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
   @keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
   .confetti-piece{position:fixed;pointer-events:none;font-size:18px;z-index:999;will-change:transform,opacity}
   header{background:var(--navy);color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
-  header h1{font-size:17px;margin:0;font-weight:700;letter-spacing:.2px}
-  .verbadge{display:inline-block;background:var(--gold);color:#241b03;font-size:11px;font-weight:700;padding:2px 8px;border-radius:10px;vertical-align:middle;margin-left:6px}
-  header .sub{font-size:12px;color:#b9c2d6;margin-top:2px}
-  .btn{border:none;border-radius:6px;padding:8px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:transform .12s,filter .12s}
+  header h1{font-size:20px;margin:0;font-weight:700;letter-spacing:.2px}
+  .verbadge{display:inline-block;background:var(--gold);color:#241b03;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;vertical-align:middle;margin-left:6px}
+  header .sub{font-size:13.5px;color:#b9c2d6;margin-top:2px}
+  .btn{border:none;border-radius:6px;padding:9px 16px;font-size:15px;font-weight:600;cursor:pointer;transition:transform .12s,filter .12s}
   .btn:hover{transform:translateY(-1px) scale(1.03)}
   .btn:active{transform:translateY(0) scale(.97)}
   .btn-gold{background:var(--gold);color:#241b03}
@@ -32,29 +32,29 @@
   main{max-width:min(1600px, 96vw);margin:0 auto;padding:20px 24px 60px;}
   .panel{background:#fff;border:1px solid var(--line);border-radius:10px;padding:16px 18px;margin-bottom:16px;}
   .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
-  .row label{font-size:12px;color:var(--muted);margin-right:4px}
-  input[type=text],input[type=password],select{border:1px solid var(--line);border-radius:6px;padding:7px 9px;font-size:13px;background:#fff}
+  .row label{font-size:13.5px;color:var(--muted);margin-right:4px}
+  input[type=text],input[type=password],select{border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:15px;background:#fff}
   .settings{display:none}
   .settings.open{display:block}
   .settingsDropdown{display:none;position:absolute;top:38px;right:0;background:#fff;color:var(--ink);border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.25);padding:14px;width:340px;z-index:50;text-align:left}
   .settingsDropdown.open{display:block}
-  .toggle-link{font-size:12px;color:var(--navy2);cursor:pointer;text-decoration:underline;}
+  .toggle-link{font-size:13.5px;color:var(--navy2);cursor:pointer;text-decoration:underline;}
   .mechips{display:flex;gap:6px;flex-wrap:wrap}
-  .mechip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:6px 14px;font-size:13px;font-weight:600;cursor:pointer;color:var(--ink);transition:transform .12s}
+  .mechip{border:1px solid var(--line);background:#fff;border-radius:20px;padding:7px 16px;font-size:15px;font-weight:600;cursor:pointer;color:var(--ink);transition:transform .12s}
   .mechip:hover{transform:scale(1.06);animation:wiggle .3s ease-in-out}
   .mechip:hover{border-color:var(--navy2)}
   .mechip.active{background:var(--navy2);border-color:var(--navy2);color:#fff}
   .monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:nowrap;gap:12px;overflow-x:auto}
-  .monthbar .title{font-size:16px;font-weight:700;white-space:nowrap}
+  .monthbar .title{font-size:18px;font-weight:700;white-space:nowrap}
   .monthnav{display:flex;align-items:center;gap:8px;flex-shrink:0}
   .monthactions{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;flex-shrink:0}
-  .navbtn{background:#fff;border:1px solid var(--line);border-radius:6px;width:30px;height:30px;cursor:pointer;font-size:14px;transition:transform .12s}
+  .navbtn{background:#fff;border:1px solid var(--line);border-radius:6px;width:32px;height:32px;cursor:pointer;font-size:16px;transition:transform .12s}
   .navbtn:hover{transform:scale(1.15)}
 
   .monthblock{margin-bottom:26px}
-  .monthblock .mtitle{font-size:14px;font-weight:700;color:var(--navy2);margin:0 0 8px 2px}
+  .monthblock .mtitle{font-size:16px;font-weight:700;color:var(--navy2);margin:0 0 8px 2px}
   .calhead{display:grid;grid-template-columns:repeat(7,1fr);background:var(--navy);border-radius:6px 6px 0 0;overflow:hidden}
-  .calhead div{color:#fff;font-size:12px;font-weight:600;padding:6px 0;text-align:center}
+  .calhead div{color:#fff;font-size:14px;font-weight:600;padding:6px 0;text-align:center}
   .calhead div.sat{color:#bcd6ff}
   .calhead div.sun{color:#ffc3d1}
   .weekwrap{position:relative;border-left:1px solid var(--line);border-right:1px solid var(--line);border-bottom:1px solid var(--line)}
@@ -67,10 +67,10 @@
   .daycell.outside{opacity:.4}
   .daycell.today{box-shadow:inset 0 0 0 2px var(--gold)}
   .daycell.selectedday{box-shadow:inset 0 0 0 2px #c9a24b;background:#fff6e0}
-  .daynum{font-size:clamp(12px,1vw,14px);font-weight:700;color:var(--ink)}
-  .holname{font-size:clamp(10px,0.85vw,12px);color:#c0392b;line-height:1.2;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .barlayer{position:absolute;left:0;right:0;top:34px;pointer-events:none}
-  .runbar{position:absolute;height:20px;border-radius:8px;font-size:clamp(10.5px,0.9vw,13px);font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:3px;padding:0 6px;overflow:hidden;white-space:nowrap;cursor:pointer;pointer-events:auto;box-shadow:0 0 0 1px rgba(255,255,255,.7);animation:popIn .18s ease-out;transition:transform .12s}
+  .daynum{font-size:clamp(14px,1.1vw,16px);font-weight:700;color:var(--ink)}
+  .holname{font-size:clamp(12px,0.95vw,14px);color:#c0392b;line-height:1.2;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .barlayer{position:absolute;left:0;right:0;top:38px;pointer-events:none}
+  .runbar{position:absolute;height:22px;border-radius:8px;font-size:clamp(12.5px,1vw,15px);font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:3px;padding:0 6px;overflow:hidden;white-space:nowrap;cursor:pointer;pointer-events:auto;box-shadow:0 0 0 1px rgba(255,255,255,.7);animation:popIn .18s ease-out;transition:transform .12s}
   .runbar.justset{animation:bouncePop .32s ease-out}
   .runbar:hover{transform:scale(1.06) translateY(-1px);z-index:5}
   .runbar.me{box-shadow:0 0 0 1px var(--navy2)}
@@ -87,62 +87,62 @@
   .code-custom{background:#eef0f4}
 
   #todayBarPanel{padding:14px 18px}
-  .todaybar-title{font-size:13px;font-weight:700;color:var(--navy2);margin-bottom:10px}
+  .todaybar-title{font-size:15px;font-weight:700;color:var(--navy2);margin-bottom:10px}
   .todaybar-people{display:flex;gap:10px;flex-wrap:wrap}
-  .tb-person{display:flex;align-items:center;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:5px 12px 5px 6px;font-size:12px;transition:.15s}
+  .tb-person{display:flex;align-items:center;gap:6px;background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:6px 14px 6px 7px;font-size:14px;transition:.15s}
   .tb-person.has-code{border-width:2px;border-color:rgba(0,0,0,.25);font-weight:600}
-  .tb-icon{font-size:16px;width:22px;height:22px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;border:1px solid var(--line)}
+  .tb-icon{font-size:18px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;background:#fff;border-radius:50%;border:1px solid var(--line)}
   .tb-name{font-weight:700}
   .tb-code{color:var(--muted)}
   .tb-person.has-code .tb-code{color:rgba(0,0,0,.6);font-weight:600}
 
-  .tb-group{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:6px 12px 6px 6px;font-size:12px}
+  .tb-group{display:flex;align-items:center;gap:8px;background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:7px 14px 7px 7px;font-size:14px}
   .tb-group.code-연차,.tb-group.code-오전반차,.tb-group.code-오후반차,.tb-group.code-출장,.tb-group.code-재택,.tb-group.code-교육,.tb-group.code-병가,.tb-group.code-경조사,.tb-group.code-custom{border-width:2px;border-color:rgba(0,0,0,.2)}
   .tb-glabel{font-weight:700}
-  .tb-gcount{background:rgba(0,0,0,.12);border-radius:10px;padding:1px 7px;font-size:11px;font-weight:700}
+  .tb-gcount{background:rgba(0,0,0,.12);border-radius:10px;padding:2px 8px;font-size:12.5px;font-weight:700}
   .tb-gnames{color:rgba(0,0,0,.65)}
 
-  .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:13px}
+  .legend{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;font-size:15px}
 
   .eventsbox{border:1px solid var(--line);border-top:none;border-radius:0 0 8px 8px;padding:10px 12px;background:#fbfbfc}
-  .eventsbox-head{display:flex;align-items:center;justify-content:space-between;font-size:12.5px;font-weight:700;color:var(--navy2);margin-bottom:6px}
-  .eventsbox-empty{font-size:12px;color:var(--muted);padding:4px 0}
-  .eventrow{display:flex;align-items:center;gap:8px;padding:5px 2px;font-size:12.5px;border-top:1px solid var(--line)}
+  .eventsbox-head{display:flex;align-items:center;justify-content:space-between;font-size:14.5px;font-weight:700;color:var(--navy2);margin-bottom:6px}
+  .eventsbox-empty{font-size:13.5px;color:var(--muted);padding:4px 0}
+  .eventrow{display:flex;align-items:center;gap:8px;padding:6px 2px;font-size:14.5px;border-top:1px solid var(--line)}
   .eventrow:first-of-type{border-top:none}
   .eventdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
   .eventtitle{font-weight:600}
-  .eventrange{color:var(--muted);font-size:11.5px}
+  .eventrange{color:var(--muted);font-size:13px}
   .eventedit{margin-left:auto}
-  .eventedit,.eventdel{border:none;background:none;cursor:pointer;font-size:12px;color:var(--muted);padding:2px 4px}
+  .eventedit,.eventdel{border:none;background:none;cursor:pointer;font-size:15px;color:var(--muted);padding:2px 4px}
   .eventdel:hover{color:#c0392b}
   .colorpick{display:flex;gap:6px;margin-top:4px}
   .colorswatch{width:26px;height:26px;border-radius:50%;cursor:pointer;border:2px solid transparent;display:flex;align-items:center;justify-content:center;font-size:10px;color:#fff}
   .colorswatch.selected{border-color:var(--ink);transform:scale(1.1)}
   .legend span{padding:3px 8px;border-radius:4px;border:1px solid var(--line)}
-  .status{font-size:12px;color:var(--muted);margin-top:8px}
+  .status{font-size:13.5px;color:var(--muted);margin-top:8px}
   .status.dirty{color:#b45309;font-weight:600}
 
   .popup{position:absolute;z-index:30;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:12px;width:300px;}
   .popup.open{display:block}
   .popup{display:none}
-  .popup h4{margin:0 0 8px;font-size:13px}
-  .popup .hol{font-size:11px;color:#c0392b;margin:-4px 0 8px}
+  .popup h4{margin:0 0 8px;font-size:15px}
+  .popup .hol{font-size:13px;color:#c0392b;margin:-4px 0 8px}
   .prow{display:flex;align-items:center;gap:6px;margin-bottom:6px}
   .prow.me{background:#e8edfb;border-radius:6px;margin:0 -6px 6px;padding:3px 6px}
-  .prow .pname{width:78px;font-size:12px;font-weight:600;flex-shrink:0}
-  .prow input{flex:1;min-width:0;font-size:12px;padding:5px 6px}
-  .prow .clr{border:none;background:none;color:var(--muted);cursor:pointer;font-size:13px;padding:2px 4px}
-  .qmbtn{display:flex;align-items:center;gap:6px;width:100%;text-align:left;border:none;background:none;padding:7px 8px;font-size:12px;cursor:pointer;border-radius:6px}
+  .prow .pname{width:84px;font-size:14px;font-weight:600;flex-shrink:0}
+  .prow input{flex:1;min-width:0;font-size:14.5px;padding:6px 7px}
+  .prow .clr{border:none;background:none;color:var(--muted);cursor:pointer;font-size:16px;padding:2px 4px}
+  .qmbtn{display:flex;align-items:center;gap:6px;width:100%;text-align:left;border:none;background:none;padding:8px 9px;font-size:14.5px;cursor:pointer;border-radius:6px}
   .qmbtn:hover{background:#f1f2f5}
   .qmbtn:disabled{opacity:.4;cursor:default}
   .qmbtn:disabled:hover{background:none}
   .qmsep{border-top:1px solid var(--line);margin:6px 0}
 
-  footer{text-align:center;color:var(--muted);font-size:11px;padding:20px}
+  footer{text-align:center;color:var(--muted);font-size:13px;padding:20px}
   #upcomingBar{margin-bottom:10px}
-  .upcoming-pill{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:8px;padding:6px 12px;font-size:12.5px;margin-right:8px;margin-bottom:6px}
-  .upcoming-dday{font-weight:700;background:var(--navy);color:#fff;border-radius:10px;padding:1px 8px;font-size:11px}
-  .logrow{display:flex;gap:8px;padding:5px 2px;font-size:12px;border-top:1px solid var(--line)}
+  .upcoming-pill{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:8px;padding:7px 14px;font-size:14.5px;margin-right:8px;margin-bottom:6px}
+  .upcoming-dday{font-weight:700;background:var(--navy);color:#fff;border-radius:10px;padding:2px 9px;font-size:12.5px}
+  .logrow{display:flex;gap:8px;padding:6px 2px;font-size:13.5px;border-top:1px solid var(--line)}
   .logrow:first-child{border-top:none}
   .logtime{color:var(--muted);white-space:nowrap}
   .logwho{font-weight:700}
@@ -164,8 +164,8 @@
 
 <header>
   <div>
-    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v15</span></h1>
-    <div class="sub">2026년 · GitHub 저장 · v15: 자동 새로고침, 다가오는 일정 알림, 날짜 이동, CSV/인쇄, 변경 이력, Esc 닫기</div>
+    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v16</span></h1>
+    <div class="sub">2026년 · GitHub 저장 · v16: 전체 글자 크기 확대 (가독성 개선)</div>
   </div>
   <div class="row" style="position:relative">
     <button class="btn btn-ghost" id="refreshBtn">새로고침</button>
@@ -206,7 +206,7 @@
         </div>
         <div class="row" style="margin-top:10px">
           <label style="width:100%;margin-bottom:4px">팀원 명단 (한 줄에 한 명씩, 순서대로 표시됨)</label>
-          <textarea id="rosterInput" rows="6" placeholder="정광호&#10;김현석&#10;민경훈" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+          <textarea id="rosterInput" rows="6" placeholder="정광호&#10;김현석&#10;민경훈" style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:15px;font-family:inherit;resize:vertical"></textarea>
         </div>
         <div class="row" style="margin-top:8px">
           <button class="btn btn-gold" id="teamSaveBtn">팀 설정 저장</button>
@@ -225,15 +225,15 @@
 
   <div class="panel" style="border-color:var(--gold);border-width:1.5px">
     <div class="row" style="margin-bottom:8px">
-      <span style="font-weight:700;font-size:13px">📢 공지사항</span>
+      <span style="font-weight:700;font-size:15px">📢 공지사항</span>
       <span class="status" id="noticeStatus" style="margin:0"></span>
     </div>
     <textarea id="noticeText" placeholder="팀 전체 공지를 입력하세요 (자동 저장됩니다)" rows="2"
-      style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:13px;font-family:inherit;resize:vertical"></textarea>
+      style="width:100%;border:1px solid var(--line);border-radius:8px;padding:8px 10px;font-size:15px;font-family:inherit;resize:vertical"></textarea>
   </div>
 
   <div class="panel">
-    <div id="setupBanner" style="display:none;background:#fff6e0;border:1px solid var(--gold);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:13px">
+    <div id="setupBanner" style="display:none;background:#fff6e0;border:1px solid var(--gold);border-radius:8px;padding:10px 14px;margin-bottom:14px;font-size:14.5px">
       ⚠️ 아직 GitHub 토큰이 설정되지 않았습니다. 지금은 입력해도 <b>다른 사람에게 공유되거나 저장되지 않습니다</b>.
       우측 상단 <b>⚙️ 설정</b>에서 토큰을 붙여넣고 적용해주세요.
     </div>
@@ -249,7 +249,7 @@
         <button class="navbtn" id="prevMonth">‹</button>
         <div class="title" id="monthTitle">2026년 1월 ~ 6월</div>
         <button class="navbtn" id="nextMonth">›</button>
-        <input type="month" id="jumpMonth" style="border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:12px">
+        <input type="month" id="jumpMonth" style="border:1px solid var(--line);border-radius:6px;padding:6px 8px;font-size:14px">
         <button class="btn btn-outline" id="jumpBtn" style="padding:6px 10px">이동</button>
       </div>
       <div class="monthactions">
@@ -558,7 +558,7 @@ function packLanes(runs){
 function barLayerHtml(week){
   const runs = packLanes(weekRuns(week));
   const maxLane = runs.reduce((m,r)=>Math.max(m,r.lane), -1);
-  const LANE_H = 20;
+  const LANE_H = 22;
   let html = "";
   const me = getMe();
   runs.forEach(r=>{
@@ -586,7 +586,7 @@ function buildMonthCalendar(y,m){
   for(const week of weeks){
     const weekData = JSON.stringify(week.map(d=>({ds:d.ds, inMonth:d.inMonth})));
     const bar = barLayerHtml(week);
-    const rowH = 34 + bar.lanes * 20 + 4;
+    const rowH = 38 + bar.lanes * 22 + 4;
     html += `<div class="weekwrap" data-week='${weekData.replace(/'/g,"&#39;")}' style="min-height:${rowH}px">`;
     html += `<div class="daysgrid" style="height:${rowH}px">`;
     for(let i=0;i<7;i++){
@@ -601,7 +601,7 @@ function buildMonthCalendar(y,m){
         ${HOLIDAYS[day.ds] ? `<div class="holname">${HOLIDAYS[day.ds]}</div>` : ""}
       </div>`;
     }
-    html += `</div><div class="barlayer" style="height:${bar.lanes*20}px">${bar.html}</div>`;
+    html += `</div><div class="barlayer" style="height:${bar.lanes*22}px">${bar.html}</div>`;
     html += `</div>`;
   }
   html += buildEventsListHtml(y,m);
@@ -631,7 +631,7 @@ function buildEventsListHtml(y,m){
   const evs = eventsOverlappingMonth(y,m);
   let html = `<div class="eventsbox">`;
   html += `<div class="eventsbox-head"><span>📌 ${y}년 ${m}월 공유 일정</span>
-    <button class="btn btn-outline" style="padding:4px 10px;font-size:12px" onclick="openEventForm(null,${y},${m})">+ 일정 추가</button></div>`;
+    <button class="btn btn-outline" style="padding:6px 12px;font-size:14px" onclick="openEventForm(null,${y},${m})">+ 일정 추가</button></div>`;
   if(evs.length === 0){
     html += `<div class="eventsbox-empty">등록된 일정이 없습니다.</div>`;
   } else {
@@ -714,7 +714,7 @@ function refreshDayCell(ds, changedPerson){
     const barlayer = weekwrap.querySelector(".barlayer");
     if(barlayer){
       barlayer.innerHTML = bar.html;
-      barlayer.style.height = (bar.lanes*20)+"px";
+      barlayer.style.height = (bar.lanes*22)+"px";
       if(changedPerson){
         // 실제로 입력한 날짜(ds)가 포함된 막대만 정확히 찾아서 효과 (동일 인물의 다른 막대는 건드리지 않음)
         const candidates = barlayer.querySelectorAll(`.runbar[data-person="${changedPerson}"]`);
@@ -724,7 +724,7 @@ function refreshDayCell(ds, changedPerson){
         });
       }
     }
-    const rowH = 34 + bar.lanes*20 + 4;
+    const rowH = 38 + bar.lanes*22 + 4;
     weekwrap.style.minHeight = rowH + "px";
     const daysgrid = weekwrap.querySelector(".daysgrid");
     if(daysgrid) daysgrid.style.height = rowH + "px"; // 칸 배경도 같이 늘려서 흰 여백이 안 생기게
