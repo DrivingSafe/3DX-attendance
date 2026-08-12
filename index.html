@@ -164,8 +164,8 @@
 
 <header>
   <div>
-    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v16</span></h1>
-    <div class="sub">2026년 · GitHub 저장 · v16: 전체 글자 크기 확대 (가독성 개선)</div>
+    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v17</span></h1>
+    <div class="sub">2026년 · GitHub 저장 · v17: 일정 즉시저장, 새로고침이 미저장 변경을 덮어쓰던 버그 수정, 종료일 자동보정</div>
   </div>
   <div class="row" style="position:relative">
     <button class="btn btn-ghost" id="refreshBtn">새로고침</button>
@@ -905,8 +905,8 @@ function openEventForm(id, defaultY, defaultM){
 
   let html = `<h4>${existing ? "일정 수정" : "새 공유 일정"}</h4>`;
   html += `<div class="prow"><span class="pname">제목</span><input type="text" id="evTitle" placeholder="예: XR UX 세미나" value="${escapeHtml(title)}"></div>`;
-  html += `<div class="prow"><span class="pname">시작일</span><input type="date" id="evStart" value="${start}"></div>`;
-  html += `<div class="prow"><span class="pname">종료일</span><input type="date" id="evEnd" value="${end}"></div>`;
+  html += `<div class="prow"><span class="pname">시작일</span><input type="date" id="evStart" value="${start}" onchange="if(document.getElementById('evEnd').value < this.value) document.getElementById('evEnd').value = this.value;"></div>`;
+  html += `<div class="prow"><span class="pname">종료일</span><input type="date" id="evEnd" value="${end}" onchange="if(this.value < document.getElementById('evStart').value) this.value = document.getElementById('evStart').value;"></div>`;
   html += `<div class="prow"><span class="pname">유형</span></div>`;
   html += `<div class="colorpick" id="evColorPick">`;
   EVENT_COLORS.forEach(c=>{
@@ -930,6 +930,10 @@ function pickEventColor(color){
     el.classList.toggle("selected", el.getAttribute("data-color")===color);
   });
 }
+function saveNow(){
+  if(autoSaveTimer) clearTimeout(autoSaveTimer);
+  saveToGithub();
+}
 function saveEvent(id){
   const title = document.getElementById("evTitle").value.trim();
   let start = document.getElementById("evStart").value;
@@ -950,6 +954,7 @@ function saveEvent(id){
   logChange(`일정 "${title}" ${id?"수정":"추가"}`);
   renderGrid();
   document.getElementById("popup").classList.remove("open");
+  saveNow(); // 일정은 자주 발생하는 입력이 아니라서 디바운스 없이 즉시 저장
 }
 function deleteEvent(id){
   if(!confirm("이 일정을 삭제할까요?")) return;
@@ -959,6 +964,7 @@ function deleteEvent(id){
   logChange(`일정 "${target?target.title:''}" 삭제`);
   renderGrid();
   document.getElementById("popup").classList.remove("open");
+  saveNow();
 }
 
 function copyDay(ds){
@@ -1169,7 +1175,17 @@ document.getElementById("ghQuickApply").addEventListener("click", ()=>{
   document.getElementById("ghPath").value = DEFAULT_PATH;
   saveSettings();
 });
-document.getElementById("refreshBtn").addEventListener("click", loadFromGithub);
+function safeLoad(){
+  // 저장 대기 중(dirty)일 땐 불러오기로 덮어쓰지 않고, 먼저 저장부터 끝내고 불러온다
+  if(state.dirty){
+    if(autoSaveTimer) clearTimeout(autoSaveTimer);
+    saveToGithub();
+    setTimeout(()=>{ if(!state.dirty) loadFromGithub(); }, 1200);
+    return;
+  }
+  loadFromGithub();
+}
+document.getElementById("refreshBtn").addEventListener("click", safeLoad);
 document.getElementById("saveBtn").addEventListener("click", ()=>{
   if(autoSaveTimer) clearTimeout(autoSaveTimer);
   saveToGithub();
@@ -1211,13 +1227,21 @@ document.addEventListener("keydown", (e)=>{
     if(multiMode){ toggleMultiMode(); }
   }
 });
-// 자동 새로고침: 25초마다 조용히 최신 데이터 반영 (편집 중일 땐 건드리지 않음)
+// 자동 새로고침: 25초마다 조용히 최신 데이터 반영 (편집 중이거나 저장 대기 중일 땐 건드리지 않음)
 setInterval(()=>{
   const popup = document.getElementById("popup");
   if(popup.classList.contains("open") || multiMode) return;
   if(document.activeElement && document.activeElement.tagName === "TEXTAREA") return;
+  if(state.dirty) return; // 아직 저장 안 된 내 변경사항을 덮어쓰지 않기 위해 건너뜀 (다음 주기에 다시 시도됨)
   if(PROXY_URL || (ls("gh_owner") && ls("gh_repo") && ls("gh_token"))) loadFromGithub();
 }, 25000);
+
+window.addEventListener("beforeunload", (e)=>{
+  if(state.dirty){
+    e.preventDefault();
+    e.returnValue = "";
+  }
+});
 
 loadSettingsUI();
 updateSetupBanner();
