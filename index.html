@@ -110,8 +110,9 @@
   .eventrow{display:flex;align-items:center;gap:8px;padding:5px 2px;font-size:12.5px;border-top:1px solid var(--line)}
   .eventrow:first-of-type{border-top:none}
   .eventdot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
-  .eventtitle{font-weight:600;flex:1}
+  .eventtitle{font-weight:600}
   .eventrange{color:var(--muted);font-size:11.5px}
+  .eventedit{margin-left:auto}
   .eventedit,.eventdel{border:none;background:none;cursor:pointer;font-size:12px;color:var(--muted);padding:2px 4px}
   .eventdel:hover{color:#c0392b}
   .colorpick{display:flex;gap:6px;margin-top:4px}
@@ -138,6 +139,24 @@
   .qmsep{border-top:1px solid var(--line);margin:6px 0}
 
   footer{text-align:center;color:var(--muted);font-size:11px;padding:20px}
+  #upcomingBar{margin-bottom:10px}
+  .upcoming-pill{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:8px;padding:6px 12px;font-size:12.5px;margin-right:8px;margin-bottom:6px}
+  .upcoming-dday{font-weight:700;background:var(--navy);color:#fff;border-radius:10px;padding:1px 8px;font-size:11px}
+  .logrow{display:flex;gap:8px;padding:5px 2px;font-size:12px;border-top:1px solid var(--line)}
+  .logrow:first-child{border-top:none}
+  .logtime{color:var(--muted);white-space:nowrap}
+  .logwho{font-weight:700}
+  @media print{
+    header, .panel .row, #settingsToggle, .monthactions, #upcomingBar, .toggle-link, #logBox,
+    .btn, .mechips, #noticeText[readonly="false"], footer, .popup { }
+    header{display:none}
+    .panel{border:none;box-shadow:none;padding:0}
+    #settingsBox, #multiStatus, #csvExportBtn, #printBtn, #jumpMonth, #jumpBtn, #multiToggle, #todayJump,
+    #logToggle, #logBox, .toggle-link { display:none !important; }
+    body{background:#fff}
+    .runbar:hover{transform:none}
+    a[href]:after{content:""}
+  }
 </style>
 </head>
 <body>
@@ -145,8 +164,8 @@
 
 <header>
   <div>
-    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v13</span></h1>
-    <div class="sub">2026년 · GitHub 저장 · v13: 월별 공유 일정(세미나/행사/공지) 추가</div>
+    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v15</span></h1>
+    <div class="sub">2026년 · GitHub 저장 · v15: 자동 새로고침, 다가오는 일정 알림, 날짜 이동, CSV/인쇄, 변경 이력, Esc 닫기</div>
   </div>
   <div class="row" style="position:relative">
     <button class="btn btn-ghost" id="refreshBtn">새로고침</button>
@@ -230,10 +249,14 @@
         <button class="navbtn" id="prevMonth">‹</button>
         <div class="title" id="monthTitle">2026년 1월 ~ 6월</div>
         <button class="navbtn" id="nextMonth">›</button>
+        <input type="month" id="jumpMonth" style="border:1px solid var(--line);border-radius:6px;padding:5px 7px;font-size:12px">
+        <button class="btn btn-outline" id="jumpBtn" style="padding:6px 10px">이동</button>
       </div>
       <div class="monthactions">
         <button class="btn btn-outline" id="todayJump">오늘로 이동</button>
         <button class="btn btn-outline" id="multiToggle">🗂 복수 입력</button>
+        <button class="btn btn-outline" id="csvExportBtn" title="현재까지 입력된 근태를 CSV로 저장 (엑셀에서 열림)">📥 CSV 내보내기</button>
+        <button class="btn btn-outline" id="printBtn" title="이 화면을 인쇄하거나 PDF로 저장">🖨 인쇄</button>
         <span id="multiStatus" style="display:none" class="row">
           <span class="status" style="margin:0" id="multiCount">0일 선택됨</span>
           <button class="btn btn-gold" id="multiApplyBtn">적용</button>
@@ -241,6 +264,7 @@
         </span>
       </div>
     </div>
+    <div id="upcomingBar"></div>
     <div id="gridContainer"></div>
     <div class="legend">
       <span class="code-연차">🌴 연차(=휴가)</span><span class="code-오전반차">🌓 오전반차</span><span class="code-오후반차">🌗 오후반차</span>
@@ -250,6 +274,10 @@
       <span>✏️ 자유 텍스트도 입력 가능</span>
     </div>
     <div class="status" id="saveStatus"></div>
+    <div class="row" style="margin-top:10px">
+      <span class="toggle-link" id="logToggle">🕘 최근 변경 이력 ▾</span>
+    </div>
+    <div class="settings" id="logBox"></div>
   </div>
 </main>
 
@@ -659,6 +687,8 @@ function renderTodayBar(){
 function renderGrid(){
   renderTodayBar();
   renderNotice();
+  renderUpcoming();
+  renderLog();
   const dl = document.getElementById("codelist");
   dl.innerHTML = [...CODES, ...Object.keys(SYNONYMS)].map(c=>`<option value="${c}">`).join("");
 
@@ -780,6 +810,7 @@ function applyMulti(){
     if(value) state.data[person][ds] = value; else delete state.data[person][ds];
   });
   markDirty();
+  logChange(`${person} ${touched.length}일 일괄 ${value?("→ "+value):"삭제"}`);
   touched.forEach(refreshDayCell);
   document.getElementById("popup").classList.remove("open");
   toggleMultiMode();
@@ -850,6 +881,7 @@ function quickSet(ev, person, ds, value){
   if(!state.data[person]) state.data[person] = {};
   if(value) state.data[person][ds] = value; else delete state.data[person][ds];
   markDirty();
+  logChange(`${person} ${ds} ${value?("→ "+value):"삭제"}`);
   refreshDayCell(ds, person);
   const x = ev && ev.clientX ? ev.clientX : window.innerWidth/2;
   const y = ev && ev.clientY ? ev.clientY : window.innerHeight/3;
@@ -915,13 +947,16 @@ function saveEvent(id){
     state.data["_events"].push({ id: uid(), title, start, end, color });
   }
   markDirty();
+  logChange(`일정 "${title}" ${id?"수정":"추가"}`);
   renderGrid();
   document.getElementById("popup").classList.remove("open");
 }
 function deleteEvent(id){
   if(!confirm("이 일정을 삭제할까요?")) return;
+  const target = getEvents().find(e=>e.id===id);
   state.data["_events"] = getEvents().filter(e=>e.id!==id);
   markDirty();
+  logChange(`일정 "${target?target.title:''}" 삭제`);
   renderGrid();
   document.getElementById("popup").classList.remove("open");
 }
@@ -1000,6 +1035,7 @@ function setEntry(person, ds, value, inputEl){
   if(!state.data[person]) state.data[person] = {};
   if(value) state.data[person][ds] = value; else delete state.data[person][ds];
   markDirty();
+  logChange(`${person} ${ds} ${value?("→ "+value):"삭제"}`);
   refreshDayCell(ds, person);
   let x = window.innerWidth/2, y = window.innerHeight/3;
   if(inputEl){ const r = inputEl.getBoundingClientRect(); x = r.left + r.width/2; y = r.top + r.height/2; }
@@ -1010,6 +1046,7 @@ function clearRow(person, ds, btn){
   const input = btn.previousElementSibling;
   if(input) input.value = "";
   markDirty();
+  logChange(`${person} ${ds} 삭제`);
   refreshDayCell(ds);
 }
 function markDirty(){
@@ -1019,6 +1056,70 @@ function markDirty(){
   document.getElementById("saveStatus").classList.add("dirty");
   scheduleAutoSave();
 }
+function logChange(what){
+  if(!state.data["_log"]) state.data["_log"] = [];
+  state.data["_log"].push({ t: Date.now(), who: getMe() || "익명", what });
+  if(state.data["_log"].length > 30) state.data["_log"] = state.data["_log"].slice(-30);
+  renderLog();
+}
+function renderLog(){
+  const box = document.getElementById("logBox");
+  if(!box) return;
+  const log = (state.data["_log"] || []).slice().reverse();
+  if(log.length === 0){ box.innerHTML = `<div class="status" style="margin-top:8px">아직 기록된 변경이 없습니다.</div>`; return; }
+  let html = "";
+  log.forEach(e=>{
+    const d = new Date(e.t);
+    const timeStr = `${d.getMonth()+1}/${d.getDate()} ${String(d.getHours()).padStart(2,"0")}:${String(d.getMinutes()).padStart(2,"0")}`;
+    html += `<div class="logrow"><span class="logtime">${timeStr}</span><span class="logwho">${escapeHtml(e.who)}</span><span>${escapeHtml(e.what)}</span></div>`;
+  });
+  box.innerHTML = html;
+}
+
+function renderUpcoming(){
+  const box = document.getElementById("upcomingBar");
+  if(!box) return;
+  const today = todayStr();
+  const in7 = dateStr(...(()=>{ const t=new Date(); t.setDate(t.getDate()+7); return [t.getFullYear(),t.getMonth()+1,t.getDate()]; })());
+  const evs = getEvents().filter(e => e.end >= today && e.start <= in7).sort((a,b)=> a.start < b.start ? -1 : 1);
+  if(evs.length === 0){ box.innerHTML = ""; return; }
+  let html = "";
+  evs.forEach(e=>{
+    const startDate = new Date(e.start);
+    const t0 = new Date(today);
+    const dday = Math.round((startDate - t0) / 86400000);
+    let ddayTxt = dday === 0 ? "오늘" : (dday > 0 ? `D-${dday}` : "진행중");
+    html += `<span class="upcoming-pill"><span class="upcoming-dday">${ddayTxt}</span><span style="color:${e.color};font-weight:700">●</span> ${escapeHtml(e.title)}</span>`;
+  });
+  box.innerHTML = html;
+}
+
+function exportCSV(){
+  const rows = [["날짜","이름","근태내용"]];
+  const allDates = new Set();
+  PEOPLE.forEach(p=>{
+    const rec = state.data[p] || {};
+    Object.keys(rec).forEach(ds=>allDates.add(ds));
+  });
+  const sortedDates = [...allDates].sort();
+  sortedDates.forEach(ds=>{
+    PEOPLE.forEach(p=>{
+      const v = state.data[p] && state.data[p][ds];
+      if(v) rows.push([ds, p, v]);
+    });
+  });
+  const csv = rows.map(r => r.map(c => `"${String(c).replace(/"/g,'""')}"`).join(",")).join("\r\n");
+  const blob = new Blob(["\uFEFF" + csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `${ORG_NAME}_근태_${todayStr()}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  a.remove();
+  URL.revokeObjectURL(url);
+}
+
 function renderNotice(){
   const el = document.getElementById("noticeText");
   if(document.activeElement !== el){ // 입력 중인데 새로고침 등으로 값이 덮어써지는 것 방지
@@ -1083,10 +1184,40 @@ document.getElementById("todayJump").addEventListener("click", ()=>{
   const t = new Date();
   state.year = t.getFullYear(); state.month = t.getMonth()+1;
   renderGrid();
+  setTimeout(()=>{
+    const el = document.querySelector(`.daycell.today`);
+    if(el) el.scrollIntoView({ behavior:"smooth", block:"center" });
+  }, 50);
 });
 document.getElementById("multiToggle").addEventListener("click", toggleMultiMode);
 document.getElementById("multiApplyBtn").addEventListener("click", openMultiApplyPopup);
 document.getElementById("multiClearBtn").addEventListener("click", clearSelection);
+document.getElementById("jumpBtn").addEventListener("click", ()=>{
+  const val = document.getElementById("jumpMonth").value; // "YYYY-MM"
+  if(!val) return;
+  const [yy,mm] = val.split("-").map(Number);
+  state.year = yy; state.month = mm;
+  renderGrid();
+});
+document.getElementById("csvExportBtn").addEventListener("click", exportCSV);
+document.getElementById("printBtn").addEventListener("click", ()=>window.print());
+document.getElementById("logToggle").addEventListener("click", ()=>{
+  document.getElementById("logBox").classList.toggle("open");
+});
+document.addEventListener("keydown", (e)=>{
+  if(e.key === "Escape"){
+    const popup = document.getElementById("popup");
+    if(popup.classList.contains("open")){ popup.classList.remove("open"); }
+    if(multiMode){ toggleMultiMode(); }
+  }
+});
+// 자동 새로고침: 25초마다 조용히 최신 데이터 반영 (편집 중일 땐 건드리지 않음)
+setInterval(()=>{
+  const popup = document.getElementById("popup");
+  if(popup.classList.contains("open") || multiMode) return;
+  if(document.activeElement && document.activeElement.tagName === "TEXTAREA") return;
+  if(PROXY_URL || (ls("gh_owner") && ls("gh_repo") && ls("gh_token"))) loadFromGithub();
+}, 25000);
 
 loadSettingsUI();
 updateSetupBanner();
