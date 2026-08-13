@@ -67,7 +67,8 @@
   .daycell.outside{opacity:.4}
   .daycell.today{box-shadow:inset 0 0 0 2px var(--gold)}
   .daycell.selectedday{box-shadow:inset 0 0 0 2px #c9a24b;background:#fff6e0}
-  .daynum{font-size:clamp(14px,1.1vw,16px);font-weight:700;color:var(--ink)}
+  .daynum{font-size:clamp(14px,1.1vw,16px);font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:space-between;gap:4px}
+  .daywx{font-size:10px;font-weight:600;color:var(--muted);white-space:nowrap}
   .holname{font-size:clamp(12px,0.95vw,14px);color:#c0392b;line-height:1.2;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .barlayer{position:absolute;left:0;right:0;top:38px;pointer-events:none}
   .runbar{position:absolute;height:22px;border-radius:8px;font-size:clamp(12.5px,1vw,15px);font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:3px;padding:0 6px;overflow:hidden;white-space:nowrap;cursor:pointer;pointer-events:auto;box-shadow:0 0 0 1px rgba(255,255,255,.7);animation:popIn .18s ease-out;transition:transform .12s}
@@ -143,6 +144,10 @@
   .upcoming-pill{display:inline-flex;align-items:center;gap:6px;background:#fff;border:1px solid var(--line);border-left:4px solid var(--gold);border-radius:8px;padding:7px 14px;font-size:14.5px;margin-right:8px;margin-bottom:6px}
   .upcoming-dday{font-weight:700;background:var(--navy);color:#fff;border-radius:10px;padding:2px 9px;font-size:12.5px}
   .logrow{display:flex;gap:8px;padding:6px 2px;font-size:13.5px;border-top:1px solid var(--line)}
+  .weather{display:flex;align-items:center;gap:8px;background:#eef4fb;border:1px solid var(--line);border-radius:10px;padding:8px 14px;font-size:13.5px;white-space:nowrap}
+  .weather .wtemp{font-size:18px;font-weight:700;color:var(--navy2)}
+  .weather .wicon{font-size:22px}
+  .weather .wloc{color:var(--muted);font-size:12px}
   .logrow:first-child{border-top:none}
   .logtime{color:var(--muted);white-space:nowrap}
   .logwho{font-weight:700}
@@ -164,8 +169,8 @@
 
 <header>
   <div>
-    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v17</span></h1>
-    <div class="sub">2026년 · GitHub 저장 · v17: 일정 즉시저장, 새로고침이 미저장 변경을 덮어쓰던 버그 수정, 종료일 자동보정</div>
+    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v19</span></h1>
+    <div class="sub">2026년 · GitHub 저장 · v19: 날씨 위치를 분당 GRC로 변경, 오류 표시 개선, 날짜별 예보 아이콘 추가</div>
   </div>
   <div class="row" style="position:relative">
     <button class="btn btn-ghost" id="refreshBtn">새로고침</button>
@@ -220,7 +225,10 @@
 
 <main>
   <div class="panel" id="todayBarPanel">
-    <div id="todayBar"></div>
+    <div class="row" style="justify-content:space-between;align-items:flex-start">
+      <div id="todayBar" style="flex:1"></div>
+      <div id="weatherWidget"></div>
+    </div>
   </div>
 
   <div class="panel" style="border-color:var(--gold);border-width:1.5px">
@@ -596,8 +604,10 @@ function buildMonthCalendar(y,m){
       const todaycls = day.ds===today ? "today" : "";
       const ev = eventOnDay(day.ds);
       const evStyle = ev ? `border-top:4px solid ${ev.color}` : "";
+      const w = DAILY_WEATHER[day.ds];
+      const wHtml = w ? `<span class="daywx" title="최고 ${w.max}° 최저 ${w.min}°">${w.icon} ${w.max}°</span>` : "";
       html += `<div class="daycell ${wkcls} ${outsidecls} ${todaycls}" data-date="${day.ds}" style="${evStyle}" title="${ev?escapeHtml(ev.title):''}" onclick="cellClick(event,'${day.ds}')" oncontextmenu="return quickMenu(event,'${day.ds}')">
-        <div class="daynum">${day.d}</div>
+        <div class="daynum">${day.d}${wHtml}</div>
         ${HOLIDAYS[day.ds] ? `<div class="holname">${HOLIDAYS[day.ds]}</div>` : ""}
       </div>`;
     }
@@ -1082,6 +1092,56 @@ function renderLog(){
   box.innerHTML = html;
 }
 
+// 날씨 (Open-Meteo, API 키 불필요) — HD현대 글로벌 R&D센터(성남시 분당구 분당수서로 477) 기준
+const WEATHER_LAT = 37.3626;
+const WEATHER_LON = 127.1085;
+const WEATHER_LOC_NAME = "분당 GRC";
+const WMO_ICON = {
+  0:"☀️",1:"🌤",2:"⛅",3:"☁️",45:"🌫",48:"🌫",
+  51:"🌦",53:"🌦",55:"🌦",61:"🌧",63:"🌧",65:"🌧",
+  71:"🌨",73:"🌨",75:"🌨",80:"🌦",81:"🌧",82:"⛈",
+  95:"⛈",96:"⛈",99:"⛈"
+};
+const WMO_TEXT = {
+  0:"맑음",1:"대체로 맑음",2:"구름 조금",3:"흐림",45:"안개",48:"안개",
+  51:"이슬비",53:"이슬비",55:"이슬비",61:"비",63:"비",65:"강한 비",
+  71:"눈",73:"눈",75:"많은 눈",80:"소나기",81:"소나기",82:"강한 소나기",
+  95:"뇌우",96:"뇌우",99:"뇌우"
+};
+let DAILY_WEATHER = {}; // ds -> {icon, max, min}
+async function loadWeather(){
+  const box = document.getElementById("weatherWidget");
+  if(!box) return;
+  box.innerHTML = `<div class="weather" style="color:var(--muted)">날씨 불러오는 중...</div>`;
+  try{
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${WEATHER_LAT}&longitude=${WEATHER_LON}&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max,temperature_2m_min&forecast_days=16&timezone=Asia%2FSeoul`;
+    const res = await fetch(url);
+    if(!res.ok) throw new Error("HTTP " + res.status);
+    const json = await res.json();
+    const temp = Math.round(json.current.temperature_2m);
+    const code = json.current.weather_code;
+    const icon = WMO_ICON[code] || "🌡";
+    const text = WMO_TEXT[code] || "";
+    box.innerHTML = `<div class="weather"><span class="wicon">${icon}</span><span class="wtemp">${temp}°C</span><span>${text}</span><span class="wloc">${WEATHER_LOC_NAME}</span></div>`;
+
+    DAILY_WEATHER = {};
+    if(json.daily && json.daily.time){
+      json.daily.time.forEach((ds, i)=>{
+        DAILY_WEATHER[ds] = {
+          icon: WMO_ICON[json.daily.weather_code[i]] || "🌡",
+          max: Math.round(json.daily.temperature_2m_max[i]),
+          min: Math.round(json.daily.temperature_2m_min[i])
+        };
+      });
+    }
+    const popup = document.getElementById("popup");
+    if(!popup.classList.contains("open") && !multiMode) renderGrid();
+  }catch(e){
+    console.error("날씨 로딩 실패:", e);
+    box.innerHTML = `<div class="weather" style="color:#c0392b;border-color:#e6b3ad" title="${escapeHtml(e.message)}">⚠️ 날씨 정보를 가져오지 못했습니다</div>`;
+  }
+}
+
 function renderUpcoming(){
   const box = document.getElementById("upcomingBar");
   if(!box) return;
@@ -1242,6 +1302,9 @@ window.addEventListener("beforeunload", (e)=>{
     e.returnValue = "";
   }
 });
+
+loadWeather();
+setInterval(loadWeather, 30 * 60 * 1000); // 30분마다 갱신
 
 loadSettingsUI();
 updateSetupBanner();
