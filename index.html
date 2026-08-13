@@ -66,11 +66,13 @@
   .daycell.sunhol{background:var(--sunhol)}
   .daycell.outside{opacity:.4}
   .daycell.today{box-shadow:inset 0 0 0 2px var(--gold)}
+  .daycell.dragover{outline:3px dashed var(--gold);outline-offset:-3px;background:#fff6e0 !important}
+  .runbar.dragging{opacity:.35}
   .daycell.selectedday{box-shadow:inset 0 0 0 2px #c9a24b;background:#fff6e0}
   .daynum{font-size:clamp(14px,1.1vw,16px);font-weight:700;color:var(--ink);display:flex;align-items:center;justify-content:space-between;gap:4px}
   .daywx{font-size:10px;font-weight:600;color:var(--muted);white-space:nowrap}
   .holname{font-size:clamp(12px,0.95vw,14px);color:#c0392b;line-height:1.2;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .barlayer{position:absolute;left:0;right:0;top:38px;pointer-events:none}
+  .barlayer{position:absolute;left:0;right:0;top:38px;pointer-events:none;z-index:10}
   .runbar{position:absolute;height:22px;border-radius:8px;font-size:clamp(12.5px,1vw,15px);font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:3px;padding:0 6px;overflow:hidden;white-space:nowrap;cursor:pointer;pointer-events:auto;box-shadow:0 0 0 1px rgba(255,255,255,.7);animation:popIn .18s ease-out;transition:transform .12s}
   .runbar.justset{animation:bouncePop .32s ease-out}
   .runbar:hover{transform:scale(1.06) translateY(-1px);z-index:5}
@@ -169,8 +171,8 @@
 
 <header>
   <div>
-    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v19</span></h1>
-    <div class="sub">2026년 · GitHub 저장 · v19: 날씨 위치를 분당 GRC로 변경, 오류 표시 개선, 날짜별 예보 아이콘 추가</div>
+    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v21</span></h1>
+    <div class="sub">2026년 · GitHub 저장 · v21: 날짜 칸 호버 시 근태 막대가 가려지던 버그 수정</div>
   </div>
   <div class="row" style="position:relative">
     <button class="btn btn-ghost" id="refreshBtn">새로고침</button>
@@ -575,8 +577,11 @@ function barLayerHtml(week){
     const top = r.lane * LANE_H;
     const mecls = (r.person===me) ? "me" : "";
     const startDs = week[r.startCol].ds;
-    html += `<div class="runbar ${classFor(r.value)} ${mecls}" data-person="${r.person}" data-start="${startDs}" data-end="${week[r.endCol].ds}" title="${escapeHtml(r.person+' · '+r.value)}"
-      style="left:${left}%;width:calc(${width}% - 3px);top:${top}px"
+    const endDs = week[r.endCol].ds;
+    html += `<div class="runbar ${classFor(r.value)} ${mecls}" data-person="${r.person}" data-start="${startDs}" data-end="${endDs}" title="${escapeHtml(r.person+' · '+r.value)} (드래그해서 날짜 이동 가능)"
+      style="left:${left}%;width:calc(${width}% - 3px);top:${top}px" draggable="true"
+      ondragstart="dragStartBar(event,'${r.person}','${startDs}','${endDs}','${escapeHtml(r.value).replace(/'/g,"&#39;")}')"
+      ondragend="dragEndBar(event)"
       onclick="cellClick(event,'${startDs}')" oncontextmenu="return quickMenu(event,'${startDs}')">
       <span>${iconFor(r.value)}</span><span class="rname">${r.person}</span><span class="rval">${escapeHtml(r.value)}</span>
     </div>`;
@@ -606,7 +611,8 @@ function buildMonthCalendar(y,m){
       const evStyle = ev ? `border-top:4px solid ${ev.color}` : "";
       const w = DAILY_WEATHER[day.ds];
       const wHtml = w ? `<span class="daywx" title="최고 ${w.max}° 최저 ${w.min}°">${w.icon} ${w.max}°</span>` : "";
-      html += `<div class="daycell ${wkcls} ${outsidecls} ${todaycls}" data-date="${day.ds}" style="${evStyle}" title="${ev?escapeHtml(ev.title):''}" onclick="cellClick(event,'${day.ds}')" oncontextmenu="return quickMenu(event,'${day.ds}')">
+      html += `<div class="daycell ${wkcls} ${outsidecls} ${todaycls}" data-date="${day.ds}" style="${evStyle}" title="${ev?escapeHtml(ev.title):''}" onclick="cellClick(event,'${day.ds}')" oncontextmenu="return quickMenu(event,'${day.ds}')"
+        ondragover="event.preventDefault(); this.classList.add('dragover')" ondragleave="this.classList.remove('dragover')" ondrop="dropOnDay(event,'${day.ds}')">
         <div class="daynum">${day.d}${wHtml}</div>
         ${HOLIDAYS[day.ds] ? `<div class="holname">${HOLIDAYS[day.ds]}</div>` : ""}
       </div>`;
@@ -712,6 +718,53 @@ function renderGrid(){
     `${months[0][0]}년 ${months[0][1]}월 ~ ${months[5][0]}년 ${months[5][1]}월`;
   document.getElementById("gridContainer").innerHTML =
     months.map(([yy,mm])=>buildMonthCalendar(yy,mm)).join("");
+}
+
+let dragInfo = null;
+function dragStartBar(ev, person, start, end, value){
+  dragInfo = { person, start, end, value };
+  ev.dataTransfer.effectAllowed = "move";
+  try{ ev.dataTransfer.setData("text/plain", person); }catch(e){}
+  ev.target.classList.add("dragging");
+}
+function dragEndBar(ev){
+  ev.target.classList.remove("dragging");
+  document.querySelectorAll(".daycell.dragover").forEach(c=>c.classList.remove("dragover"));
+}
+function addDays(ds, n){
+  const d = new Date(ds);
+  d.setDate(d.getDate() + n);
+  return dateStr(d.getFullYear(), d.getMonth()+1, d.getDate());
+}
+function dropOnDay(ev, targetDs){
+  ev.preventDefault();
+  document.querySelectorAll(".daycell.dragover").forEach(c=>c.classList.remove("dragover"));
+  if(!dragInfo) return;
+  const offset = Math.round((new Date(targetDs) - new Date(dragInfo.start)) / 86400000);
+  if(offset === 0){ dragInfo = null; return; }
+  const { person, start, end, value } = dragInfo;
+  dragInfo = null;
+
+  const moves = [];
+  let cur = new Date(start);
+  const endD = new Date(end);
+  while(cur <= endD){
+    const oldDs = dateStr(cur.getFullYear(), cur.getMonth()+1, cur.getDate());
+    const newDs = addDays(oldDs, offset);
+    moves.push([oldDs, newDs]);
+    cur.setDate(cur.getDate()+1);
+  }
+  const hasConflict = moves.some(([oldDs,newDs]) => state.data[person] && state.data[person][newDs] && !moves.some(m=>m[0]===newDs));
+  if(hasConflict && !confirm("옮기려는 날짜에 이미 다른 근태가 있습니다. 덮어쓸까요?")) return;
+
+  if(!state.data[person]) state.data[person] = {};
+  moves.forEach(([oldDs]) => { delete state.data[person][oldDs]; });
+  moves.forEach(([,newDs]) => { state.data[person][newDs] = value; });
+
+  markDirty();
+  logChange(`${person} "${value}" ${start}${start!==end?"~"+end:""} → ${addDays(start,offset)}${start!==end?"~"+addDays(end,offset):""} 이동`);
+  renderGrid();
+  saveNow();
 }
 
 function refreshDayCell(ds, changedPerson){
