@@ -15,7 +15,28 @@
   @keyframes bouncePop{0%{transform:scale(.5);opacity:0}60%{transform:scale(1.15);opacity:1}100%{transform:scale(1)}}
   @keyframes wiggle{0%,100%{transform:rotate(0)}25%{transform:rotate(-4deg)}75%{transform:rotate(4deg)}}
   .confetti-piece{position:fixed;pointer-events:none;font-size:18px;z-index:999;will-change:transform,opacity}
-  header{background:var(--navy);color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;}
+
+  #mascot{position:fixed;font-size:34px;z-index:150;cursor:pointer;user-select:none;
+    transition:left 1.1s cubic-bezier(.4,0,.2,1), top 1.1s cubic-bezier(.4,0,.2,1), transform .2s;
+    filter:drop-shadow(0 3px 4px rgba(0,0,0,.25));}
+  #mascot:hover{transform:scale(1.15)}
+  #mascot.flip{transform:scaleX(-1)}
+  #mascot.flip:hover{transform:scaleX(-1) scale(1.15)}
+  #mascot.bounce{animation:mascotBounce .5s ease-in-out}
+  @keyframes mascotBounce{0%,100%{margin-top:0}50%{margin-top:-14px}}
+  .petcare{width:260px}
+  .petcare .pname{font-size:16px;font-weight:700;text-align:center;margin-bottom:2px}
+  .petcare .pstage{text-align:center;color:var(--muted);font-size:12px;margin-bottom:8px}
+  .petcare .pemoji{font-size:52px;text-align:center;margin-bottom:6px}
+  .petstat{margin-bottom:8px}
+  .petstat .plabel{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px}
+  .petstat .pbar{height:8px;background:var(--paper);border-radius:5px;overflow:hidden}
+  .petstat .pbar-fill{height:100%;border-radius:5px;transition:width .3s}
+  .petbtns{display:flex;gap:8px;margin-top:10px}
+  .petbtns .btn{flex:1;justify-content:center}
+  .prenamerow{display:flex;gap:6px;margin-top:10px;align-items:center}
+  .prenamerow input{flex:1;font-size:12px;padding:5px 7px;border:1px solid var(--line);border-radius:6px}
+  header{background:var(--navy);color:#fff;padding:18px 24px;display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;position:sticky;top:0;z-index:100;box-shadow:0 2px 10px rgba(0,0,0,.15)}
   header h1{font-size:20px;margin:0;font-weight:700;letter-spacing:.2px}
   .verbadge{display:inline-block;background:var(--gold);color:#241b03;font-size:12px;font-weight:700;padding:2px 8px;border-radius:10px;vertical-align:middle;margin-left:6px}
   header .sub{font-size:13.5px;color:#b9c2d6;margin-top:2px}
@@ -44,7 +65,7 @@
   .mechip:hover{transform:scale(1.06);animation:wiggle .3s ease-in-out}
   .mechip:hover{border-color:var(--navy2)}
   .mechip.active{background:var(--navy2);border-color:var(--navy2);color:#fff}
-  .monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:nowrap;gap:12px;overflow-x:auto}
+  .monthbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:nowrap;gap:12px;overflow-x:auto;position:sticky;top:var(--header-h,64px);z-index:40;background:#fff;padding:10px 0;border-bottom:1px solid var(--line)}
   .monthbar .title{font-size:18px;font-weight:700;white-space:nowrap}
   .monthnav{display:flex;align-items:center;gap:8px;flex-shrink:0}
   .monthactions{display:flex;align-items:center;gap:8px;flex-wrap:nowrap;flex-shrink:0}
@@ -126,7 +147,7 @@
   .status{font-size:13.5px;color:var(--muted);margin-top:8px}
   .status.dirty{color:#b45309;font-weight:600}
 
-  .popup{position:absolute;z-index:30;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:12px;width:300px;}
+  .popup{position:absolute;z-index:200;background:#fff;border:1px solid var(--line);border-radius:10px;box-shadow:0 10px 30px rgba(0,0,0,.18);padding:12px;width:300px;}
   .popup.open{display:block}
   .popup{display:none}
   .popup h4{margin:0 0 8px;font-size:15px}
@@ -161,7 +182,7 @@
     header{display:none}
     .panel{border:none;box-shadow:none;padding:0}
     #settingsBox, #multiStatus, #csvExportBtn, #printBtn, #jumpMonth, #jumpBtn, #multiToggle, #todayJump,
-    #logToggle, #logBox, .toggle-link { display:none !important; }
+    #logToggle, #logBox, .toggle-link, #mascot { display:none !important; }
     body{background:#fff}
     .runbar:hover{transform:none}
     a[href]:after{content:""}
@@ -173,8 +194,8 @@
 
 <header>
   <div>
-    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v22</span></h1>
-    <div class="sub">2026년 · GitHub 저장 · v22: 드래그 이동 버그 수정(텍스트선택 충돌), 날씨 최저/최고 표시 추가</div>
+    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v24</span></h1>
+    <div class="sub">2026년 · GitHub 저장 · v24: 팀 마스코트 강아지 추가 (밥주기/놀아주기/성장/마우스 따라다니기)</div>
   </div>
   <div class="row" style="position:relative">
     <button class="btn btn-ghost" id="refreshBtn">새로고침</button>
@@ -294,6 +315,7 @@
 </main>
 
 <div class="popup" id="popup"></div>
+<div id="mascot" title="클릭해서 돌봐주세요 🐾">🐶</div>
 
 <footer>제작: HDX 3D응용연구팀 · 써보시고 불편한 점이나 아이디어 있으면 편하게 알려주세요 🙂</footer>
 
@@ -347,6 +369,7 @@ function applyConfig(){
   const orgEl = document.getElementById("orgNameDisplay");
   if(orgEl) orgEl.textContent = ORG_NAME;
   document.title = ORG_NAME + " 근태 현황";
+  if(typeof updateHeaderHeightVar === "function") updateHeaderHeightVar();
 }
 function fillTeamSettingsUI(){
   document.getElementById("orgNameInput").value = ORG_NAME;
@@ -707,6 +730,7 @@ function renderGrid(){
   renderNotice();
   renderUpcoming();
   renderLog();
+  updateMascotAppearance();
   const dl = document.getElementById("codelist");
   dl.innerHTML = [...CODES, ...Object.keys(SYNONYMS)].map(c=>`<option value="${c}">`).join("");
 
@@ -915,6 +939,161 @@ function quickMenu(ev, ds){
   popup.classList.add("open");
   setTimeout(()=>{ document.addEventListener("click", closePopupOnce); }, 0);
   return false;
+}
+
+// ===== 팀 마스코트 강아지 =====
+const PET_STAGES = [
+  { min:0,  emoji:"🐶", label:"강아지" },
+  { min:15, emoji:"🐕", label:"청년견" },
+  { min:40, emoji:"🐕‍🦺", label:"믿음직한 개" },
+  { min:80, emoji:"🐩", label:"품격견" },
+];
+function getPet(){
+  if(!state.data["_pet"]){
+    state.data["_pet"] = { name:"댕댕이", exp:0, lastFed:Date.now(), lastPlayed:Date.now() };
+  }
+  return state.data["_pet"];
+}
+function petStage(exp){
+  let s = PET_STAGES[0];
+  for(const st of PET_STAGES){ if(exp >= st.min) s = st; }
+  return s;
+}
+function petDecayStat(lastTime){
+  const hours = (Date.now() - lastTime) / 3600000;
+  return Math.max(0, Math.min(100, Math.round(100 - hours * 4))); // 대략 하루 지나면 거의 0
+}
+function petMoodEmoji(hunger, happiness){
+  const avg = (hunger + happiness) / 2;
+  if(avg < 25) return "😢";
+  if(avg < 55) return "😐";
+  return "✨";
+}
+function updateMascotAppearance(){
+  const el = document.getElementById("mascot");
+  if(!el) return;
+  const pet = getPet();
+  const stage = petStage(pet.exp || 0);
+  el.textContent = stage.emoji;
+  el.title = `${pet.name} (${stage.label}) — 클릭해서 돌봐주세요 🐾`;
+}
+
+let mascotPos = { x: window.innerWidth - 100, y: window.innerHeight - 140 };
+let mascotChasing = false;
+let mascotWanderTimer = null;
+
+function moveMascotTo(x, y){
+  const el = document.getElementById("mascot");
+  if(!el) return;
+  const nx = Math.max(10, Math.min(window.innerWidth - 50, x));
+  const ny = Math.max(70, Math.min(window.innerHeight - 50, y));
+  if(nx < mascotPos.x) el.classList.add("flip"); else if(nx > mascotPos.x) el.classList.remove("flip");
+  mascotPos = { x: nx, y: ny };
+  el.style.left = nx + "px";
+  el.style.top = ny + "px";
+}
+function mascotWanderStep(){
+  if(mascotChasing) return;
+  const rx = 30 + Math.random() * (window.innerWidth - 90);
+  const ry = 90 + Math.random() * (window.innerHeight - 180);
+  moveMascotTo(rx, ry);
+}
+function initMascot(){
+  const el = document.getElementById("mascot");
+  if(!el) return;
+  moveMascotTo(mascotPos.x, mascotPos.y);
+  mascotWanderTimer = setInterval(mascotWanderStep, 6000);
+  document.addEventListener("mousemove", (e)=>{
+    const dx = e.clientX - mascotPos.x, dy = e.clientY - mascotPos.y;
+    const dist = Math.sqrt(dx*dx + dy*dy);
+    if(dist < 140 && dist > 30){
+      mascotChasing = true;
+      const angle = Math.atan2(dy, dx);
+      moveMascotTo(mascotPos.x + Math.cos(angle)*40, mascotPos.y + Math.sin(angle)*40);
+      clearTimeout(window._mascotChaseTimeout);
+      window._mascotChaseTimeout = setTimeout(()=>{ mascotChasing = false; }, 2500);
+    }
+  });
+  el.addEventListener("click", (e)=>{ e.stopPropagation(); openPetCare(); });
+}
+
+function openPetCare(){
+  const pet = getPet();
+  const hunger = petDecayStat(pet.lastFed);
+  const happiness = petDecayStat(pet.lastPlayed);
+  const stage = petStage(pet.exp || 0);
+  const mood = petMoodEmoji(hunger, happiness);
+  const popup = document.getElementById("popup");
+  document.removeEventListener("click", closePopupOnce);
+  let html = `<div class="petcare">`;
+  html += `<div class="pemoji">${stage.emoji} ${mood}</div>`;
+  html += `<div class="pname">${escapeHtml(pet.name)}</div>`;
+  html += `<div class="pstage">${stage.label} · 경험치 ${pet.exp||0}</div>`;
+  html += petStatBar("배고픔", hunger, "#e69138");
+  html += petStatBar("행복도", happiness, "#6d9eeb");
+  html += `<div class="petbtns">
+    <button class="btn btn-outline" onclick="feedPet()">🍖 밥주기</button>
+    <button class="btn btn-outline" onclick="playPet()">🎾 놀아주기</button>
+  </div>`;
+  html += `<div class="prenamerow">
+    <input type="text" id="petNameInput" value="${escapeHtml(pet.name)}" placeholder="이름 짓기">
+    <button class="btn btn-gold" style="padding:6px 10px" onclick="renamePet()">이름변경</button>
+  </div>`;
+  html += `</div>`;
+  popup.innerHTML = html;
+  const mel = document.getElementById("mascot");
+  const rect = mel.getBoundingClientRect();
+  let left = window.scrollX + rect.left - 100;
+  if(left < window.scrollX + 10) left = window.scrollX + 10;
+  if(left + 280 > window.scrollX + window.innerWidth) left = window.scrollX + window.innerWidth - 290;
+  popup.style.left = left + "px";
+  popup.style.top = (window.scrollY + rect.top - 260) + "px";
+  popup.classList.add("open");
+  setTimeout(()=>{ document.addEventListener("click", closePopupOnce); }, 0);
+}
+function petStatBar(label, value, color){
+  return `<div class="petstat"><div class="plabel"><span>${label}</span><span>${value}</span></div>
+    <div class="pbar"><div class="pbar-fill" style="width:${value}%;background:${color}"></div></div></div>`;
+}
+function bounceMascot(){
+  const el = document.getElementById("mascot");
+  el.classList.add("bounce");
+  setTimeout(()=>el.classList.remove("bounce"), 500);
+}
+function feedPet(){
+  const pet = getPet();
+  pet.lastFed = Date.now();
+  pet.exp = (pet.exp||0) + 2;
+  markDirty();
+  logChange(`${getMe()||"누군가"}가 ${pet.name}에게 밥을 줬어요 🍖`);
+  document.getElementById("popup").classList.remove("open");
+  bounceMascot();
+  const mel = document.getElementById("mascot"); const r = mel.getBoundingClientRect();
+  burstConfetti(r.left+20, r.top+20);
+  saveNow();
+}
+function playPet(){
+  const pet = getPet();
+  pet.lastPlayed = Date.now();
+  pet.exp = (pet.exp||0) + 3;
+  markDirty();
+  logChange(`${getMe()||"누군가"}가 ${pet.name}와 놀아줬어요 🎾`);
+  document.getElementById("popup").classList.remove("open");
+  bounceMascot();
+  const mel = document.getElementById("mascot"); const r = mel.getBoundingClientRect();
+  burstConfetti(r.left+20, r.top+20);
+  saveNow();
+}
+function renamePet(){
+  const name = document.getElementById("petNameInput").value.trim();
+  if(!name) return;
+  const pet = getPet();
+  const old = pet.name;
+  pet.name = name;
+  markDirty();
+  logChange(`${old} → ${name}(으)로 이름이 바뀌었어요`);
+  document.getElementById("popup").classList.remove("open");
+  saveNow();
 }
 
 function burstConfetti(x, y){
@@ -1363,6 +1542,16 @@ window.addEventListener("beforeunload", (e)=>{
     e.returnValue = "";
   }
 });
+
+function updateHeaderHeightVar(){
+  const h = document.querySelector("header");
+  if(h) document.documentElement.style.setProperty("--header-h", h.offsetHeight + "px");
+}
+updateHeaderHeightVar();
+window.addEventListener("resize", updateHeaderHeightVar);
+window.addEventListener("load", updateHeaderHeightVar);
+
+initMascot();
 
 loadWeather();
 setInterval(loadWeather, 30 * 60 * 1000); // 30분마다 갱신
