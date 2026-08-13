@@ -73,7 +73,8 @@
   .daywx{font-size:10px;font-weight:600;color:var(--muted);white-space:nowrap}
   .holname{font-size:clamp(12px,0.95vw,14px);color:#c0392b;line-height:1.2;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
   .barlayer{position:absolute;left:0;right:0;top:38px;pointer-events:none;z-index:10}
-  .runbar{position:absolute;height:22px;border-radius:8px;font-size:clamp(12.5px,1vw,15px);font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:3px;padding:0 6px;overflow:hidden;white-space:nowrap;cursor:pointer;pointer-events:auto;box-shadow:0 0 0 1px rgba(255,255,255,.7);animation:popIn .18s ease-out;transition:transform .12s}
+  .runbar{position:absolute;height:22px;border-radius:8px;font-size:clamp(12.5px,1vw,15px);font-weight:600;color:#1a1a1a;display:flex;align-items:center;gap:3px;padding:0 6px;overflow:hidden;white-space:nowrap;cursor:grab;pointer-events:auto;box-shadow:0 0 0 1px rgba(255,255,255,.7);animation:popIn .18s ease-out;transition:transform .12s;user-select:none;-webkit-user-select:none;-webkit-user-drag:element}
+  .runbar *{pointer-events:none} /* 자식(아이콘/텍스트)이 드래그 타깃을 가로채지 않도록 */
   .runbar.justset{animation:bouncePop .32s ease-out}
   .runbar:hover{transform:scale(1.06) translateY(-1px);z-index:5}
   .runbar.me{box-shadow:0 0 0 1px var(--navy2)}
@@ -150,6 +151,7 @@
   .weather .wtemp{font-size:18px;font-weight:700;color:var(--navy2)}
   .weather .wicon{font-size:22px}
   .weather .wloc{color:var(--muted);font-size:12px}
+  .weather .wrange{color:var(--navy2);font-size:12.5px;font-weight:600}
   .logrow:first-child{border-top:none}
   .logtime{color:var(--muted);white-space:nowrap}
   .logwho{font-weight:700}
@@ -171,8 +173,8 @@
 
 <header>
   <div>
-    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v21</span></h1>
-    <div class="sub">2026년 · GitHub 저장 · v21: 날짜 칸 호버 시 근태 막대가 가려지던 버그 수정</div>
+    <h1><span id="orgNameDisplay">3D응용연구팀</span> 근태 현황 <span class="verbadge">v22</span></h1>
+    <div class="sub">2026년 · GitHub 저장 · v22: 드래그 이동 버그 수정(텍스트선택 충돌), 날씨 최저/최고 표시 추가</div>
   </div>
   <div class="row" style="position:relative">
     <button class="btn btn-ghost" id="refreshBtn">새로고침</button>
@@ -721,14 +723,17 @@ function renderGrid(){
 }
 
 let dragInfo = null;
+let isDragging = false;
 function dragStartBar(ev, person, start, end, value){
   dragInfo = { person, start, end, value };
+  isDragging = true;
   ev.dataTransfer.effectAllowed = "move";
   try{ ev.dataTransfer.setData("text/plain", person); }catch(e){}
-  ev.target.classList.add("dragging");
+  ev.currentTarget.classList.add("dragging");
 }
 function dragEndBar(ev){
-  ev.target.classList.remove("dragging");
+  isDragging = false;
+  ev.currentTarget.classList.remove("dragging");
   document.querySelectorAll(".daycell.dragover").forEach(c=>c.classList.remove("dragover"));
 }
 function addDays(ds, n){
@@ -1175,7 +1180,6 @@ async function loadWeather(){
     const code = json.current.weather_code;
     const icon = WMO_ICON[code] || "🌡";
     const text = WMO_TEXT[code] || "";
-    box.innerHTML = `<div class="weather"><span class="wicon">${icon}</span><span class="wtemp">${temp}°C</span><span>${text}</span><span class="wloc">${WEATHER_LOC_NAME}</span></div>`;
 
     DAILY_WEATHER = {};
     if(json.daily && json.daily.time){
@@ -1187,8 +1191,12 @@ async function loadWeather(){
         };
       });
     }
+    const todayW = DAILY_WEATHER[todayStr()];
+    const rangeTxt = todayW ? `<span class="wrange">최저 ${todayW.min}° · 최고 ${todayW.max}°</span>` : "";
+    box.innerHTML = `<div class="weather"><span class="wicon">${icon}</span><span class="wtemp">${temp}°C</span><span>${text}</span>${rangeTxt}<span class="wloc">${WEATHER_LOC_NAME}</span></div>`;
+
     const popup = document.getElementById("popup");
-    if(!popup.classList.contains("open") && !multiMode) renderGrid();
+    if(!popup.classList.contains("open") && !multiMode && !isDragging) renderGrid();
   }catch(e){
     console.error("날씨 로딩 실패:", e);
     box.innerHTML = `<div class="weather" style="color:#c0392b;border-color:#e6b3ad" title="${escapeHtml(e.message)}">⚠️ 날씨 정보를 가져오지 못했습니다</div>`;
@@ -1343,7 +1351,7 @@ document.addEventListener("keydown", (e)=>{
 // 자동 새로고침: 25초마다 조용히 최신 데이터 반영 (편집 중이거나 저장 대기 중일 땐 건드리지 않음)
 setInterval(()=>{
   const popup = document.getElementById("popup");
-  if(popup.classList.contains("open") || multiMode) return;
+  if(popup.classList.contains("open") || multiMode || isDragging) return;
   if(document.activeElement && document.activeElement.tagName === "TEXTAREA") return;
   if(state.dirty) return; // 아직 저장 안 된 내 변경사항을 덮어쓰지 않기 위해 건너뜀 (다음 주기에 다시 시도됨)
   if(PROXY_URL || (ls("gh_owner") && ls("gh_repo") && ls("gh_token"))) loadFromGithub();
